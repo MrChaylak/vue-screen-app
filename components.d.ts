@@ -12,5 +12,7 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     ScreenContent: typeof import('./src/components/ScreenContent.vue')['default']
+    SignalClient: typeof import('./src/components/SignalClient.vue')['default']
+    SocketTest: typeof import('./src/components/SocketTest.vue')['default']
   }
 }

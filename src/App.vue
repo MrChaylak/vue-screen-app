@@ -2,6 +2,8 @@
   <v-app>
     <v-main>
       <div class="screen-container border-md">
+        <!-- <SocketTest /> -->
+        <SignalClient />
         <!-- Screen Share Display -->
         <div class="screen-share-display ">
           <video 
@@ -65,10 +67,11 @@
 <script>
 import CameraDisplay from "./components/CameraDisplay.vue";
 import BottomBar from "./components/BottomBar.vue";
+import SignalClient from "./components/SignalClient.vue";
 
 export default {
   name: "App",
-  components: { CameraDisplay, BottomBar },
+  components: { CameraDisplay, BottomBar, SignalClient },
   data() {
     return {
       cameras: [],
