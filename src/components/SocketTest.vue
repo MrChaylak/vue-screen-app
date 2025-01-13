@@ -1,29 +1,19 @@
 <template>
-    <div>
-      <button @click="testConnectivity">Test Server Connectivity</button>
-      <p>{{ serverResponse }}</p>
-    </div>
-  </template>
-  
-  <script>
-  import { io } from "socket.io-client";
+  <div>
+    <h1>Vue + Socket.IO</h1>
+    <button @click="sendMessage">Send Message to Server</button>
+  </div>
+</template>
 
-const socket = io("http://localhost:5000");
+<script>
+import socket from '@/socket';
 
-// Handle connection
-socket.on("connect", () => {
-  console.log("Connected to signaling server");
-  // Send an identification message
-  socket.emit("identify_client", { clientType: "Vue.js App" });
-});
-
-// Handle server's identify event
-socket.on("identify", (data) => {
-  console.log("Server asks for identity:", data.message);
-  socket.emit("identify_client", { clientType: "Vue.js App" });
-});
-
-export default socket;
-
-  </script>
-  
+export default {
+  name: 'App',
+  methods: {
+    sendMessage() {
+      socket.emit('custom-event', { msg: 'Hello from Vue!' });
+    }
+  }
+}
+</script>

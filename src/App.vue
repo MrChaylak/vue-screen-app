@@ -68,10 +68,11 @@
 import CameraDisplay from "./components/CameraDisplay.vue";
 import BottomBar from "./components/BottomBar.vue";
 import SignalClient from "./components/SignalClient.vue";
+import SocketTest from "./components/SocketTest.vue";
 
 export default {
   name: "App",
-  components: { CameraDisplay, BottomBar, SignalClient },
+  components: { CameraDisplay, BottomBar, SignalClient, SocketTest },
   data() {
     return {
       cameras: [],
