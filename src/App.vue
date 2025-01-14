@@ -29,12 +29,13 @@
 </template>
 
 <script>
+import SignalClient from "./components/SignalClient.vue";
 import BottomBar from "./components/BottomBar.vue";
 import ScreenContent from "./components/ScreenContent.vue";
 
 export default {
   name: "App",
-  components: { BottomBar, ScreenContent },
+  components: { SignalClient, BottomBar, ScreenContent },
   data() {
     return {
       cameras: [],

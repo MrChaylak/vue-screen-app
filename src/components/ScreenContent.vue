@@ -52,12 +52,11 @@
 </template>
 
 <script>
-import SignalClient from "./SignalClient.vue";
 import CameraDisplay from "./CameraDisplay.vue";
 
 export default {
   name: "ScreenContent",
-  components: { SignalClient, CameraDisplay },
+  components: { CameraDisplay },
   props: {
     isCameraRunning: {
       type: Boolean,
