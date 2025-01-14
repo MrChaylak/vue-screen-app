@@ -3,11 +3,7 @@
 
     <!-- Screen Share Display -->
     <div class="screen-share-display">
-      <video 
-        ref="screenVideo" 
-        autoplay 
-        playsinline 
-        style="width: 100%; height: 100%; background-color: #000;">
+      <video ref="screenVideo" autoplay playsinline style="width: 100%; height: 100%; background-color: #000;">
       </video>
     </div>
 
@@ -17,27 +13,15 @@
     </div>
 
     <!-- Screen Selection Dialog -->
-    <v-dialog 
-      :value="showScreenDialog" 
-      @input="$emit('update:showScreenDialog', $event)"
-      max-width="600px"
-    >
+    <v-dialog :model-value="showScreenDialog" @update:model-value="onDialogInput" max-width="600px">
+
       <v-card>
         <v-card-title>Select a screen to share</v-card-title>
         <v-card-text>
           <v-row>
-            <v-col 
-              v-for="source in screenSources" 
-              :key="source.id" 
-              cols="6" 
-              class="screen-option"
-            >
-              <v-img 
-                :src="source.thumbnail" 
-                aspect-ratio="16/9" 
-                @click="$emit('startScreenShare', source)"
-                class="screen-thumbnail"
-              />
+            <v-col v-for="source in screenSources" :key="source.id" cols="6" class="screen-option">
+              <v-img :src="source.thumbnail" aspect-ratio="16/9" @click="$emit('startScreenShare', source)"
+                class="screen-thumbnail" />
               <p class="text-center">{{ source.name }}</p>
             </v-col>
           </v-row>
@@ -74,7 +58,36 @@ export default {
       type: Array,
       default: () => [],
     },
+    screenStream: { 
+      type: Object, 
+      default: null 
+    },
   },
+  // emits: ["update:showScreenDialog", "startScreenShare"],
+  methods: {
+    onDialogInput(value) {
+      this.$emit("update:showScreenDialog", value);
+    },
+  },
+  watch: {
+    screenStream: {
+      immediate: true,
+      handler(newStream) {
+        if (newStream) {
+          const videoElement = this.$refs.screenVideo;
+          videoElement.srcObject = newStream; // Set the stream to the video element
+        }
+      },
+    },
+  },
+  // watch: {
+  //   showScreenDialog(newValue) {
+  //     console.log("showScreenDialog updated:", newValue);
+  //   }
+  // },
+  // mounted() {
+  //   console.log("showScreenDialog in ScreenContent:", this.showScreenDialog);
+  // }
 };
 </script>
 
@@ -99,7 +112,8 @@ export default {
 /* Camera feed as a floating window */
 .camera-feed {
   position: absolute;
-  top: 20px; /* Position relative to the screen video */
+  top: 20px;
+  /* Position relative to the screen video */
   right: 20px;
   width: 200px;
   height: 120px;
@@ -107,7 +121,8 @@ export default {
   border: 2px solid #adadad;
   border-radius: 8px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  z-index: 10; /* Ensures camera feed is on top */
+  z-index: 10;
+  /* Ensures camera feed is on top */
   overflow: hidden;
 }
 

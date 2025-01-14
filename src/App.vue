@@ -4,27 +4,20 @@
       <!-- Signal Client -->
       <SignalClient />
 
-      <ScreenContent
-        :isCameraRunning="isCameraRunning"
-        :currentStream="currentStream"
+      <ScreenContent 
+        :isCameraRunning="isCameraRunning" 
+        :currentStream="currentStream" 
         :screenSources="screenSources"
         :showScreenDialog="showScreenDialog"
+        :screenStream="screenStream"
         @update:showScreenDialog="value => showScreenDialog = value"
-        @startScreenShare="startScreenShare"
-      />
+        @startScreenShare="startScreenShare" />
     </v-main>
 
     <!-- Bottom Bar for Controls -->
-    <BottomBar
-      :participantCount="0"
-      :cameraOptions="cameras"
-      :selectedCameraId="selectedCameraId"
-      :isScreenSharing="!!screenStream"
-      @toggle-camera="toggleCamera"
-      @update-camera="updateSelectedCamera"
-      @share-screen="showScreenSelection"
-      @stop-screen-share="stopScreenShare"
-    />
+    <BottomBar :participantCount="0" :cameraOptions="cameras" :selectedCameraId="selectedCameraId"
+      :isScreenSharing="!!screenStream" @toggle-camera="toggleCamera" @update-camera="updateSelectedCamera"
+      @share-screen="showScreenSelection" @stop-screen-share="stopScreenShare" />
   </v-app>
 </template>
 
@@ -65,17 +58,23 @@ export default {
       }
     },
     async showScreenSelection() {
-      try {
-        const sources = await window.electron.getSources();
-        this.screenSources = sources.map(source => ({
-          id: source.id,
-          name: source.name,
-          thumbnail: source.thumbnail.toDataURL(),
-        }));
-        this.showScreenDialog = true;
-      } catch (error) {
-        console.error("Error fetching screens:", error);
-      }
+      // try {
+      //   const sources = await window.electron.getSources();
+      //   this.screenSources = sources.map(source => ({
+      //     id: source.id,
+      //     name: source.name,
+      //     thumbnail: source.thumbnail.toDataURL(),
+      //   }));
+      //   this.showScreenDialog = true;
+      // } catch (error) {
+      //   console.error("Error fetching screens:", error);
+      // }
+      this.screenSources = [
+        { id: "1", name: "Screen 1", thumbnail: "example1.jpg" },
+        { id: "2", name: "Screen 2", thumbnail: "example2.jpg" },
+      ];
+      console.log('showScreenSelection called');
+      this.showScreenDialog = true;
     },
     async startScreenShare(source) {
       try {
