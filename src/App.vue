@@ -51,41 +51,46 @@ export default {
   },
   methods: {
     handleConnect() {
-  console.log("Connect button clicked");
+      console.log("Connect button clicked");
 
-  // Check if the socket connection already exists
-  if (!this.socket) {
-    // Create a new socket connection if not already connected
-    this.socket = io("http://localhost:8181", {
-      auth: {
-        userName: "vue", // Unique username for the Vue app
-        password: "x", // Matches the server requirement
-      },
-    });
+      if (this.socket && this.socket.connected) {
+        // If socket is already connected, disconnect it
+        console.log("Disconnecting socket:", this.socket.id);
+        this.socket.disconnect();
+        this.socket = null; // Clear the socket reference
+      } else {
+        // Create a new socket connection if not already connected
 
-    // Handle connection
-    this.socket.on("connect", () => {
-      console.log("Vue connected to server with ID:", this.socket.id);
-    });
+        this.socket = io("http://localhost:8181", {
+          auth: {
+            userName: "vue", // Unique username for the Vue app
+            password: "x", // Matches the server requirement
+          },
+        });
 
-    // Handle new answers
-    this.socket.on("answerResponse", (offerObj) => {
-      console.log("Answer received from server:", offerObj);
-    });
+          // Handle connection
+          this.socket.on("connect", () => {
+            console.log("Vue connected to server with ID:", this.socket.id);
+          });
 
-    this.socket.on("disconnect", () => {
-      console.log("Socket disconnected");
-    });
-  }
+          // Handle new answers
+          this.socket.on("answerResponse", (offerObj) => {
+            console.log("Answer received from server:", offerObj);
+          });
 
-  // Always send a new offer, regardless of whether the socket was newly created
-  const offer = {
-    sdp: "sample-sdp-offer-from-vue", // Replace with a mock SDP
-    type: "offer",
-  };
-  this.socket.emit("newOffer", offer);
-  console.log("Offer sent to server:", offer);
-},
+          this.socket.on("disconnect", () => {
+            console.log("Socket disconnected");
+          });
+
+        // Always send a new offer, regardless of whether the socket was newly created
+        const offer = {
+          sdp: "sample-sdp-offer-from-vue", // Replace with a mock SDP
+          type: "offer",
+        };
+        this.socket.emit("newOffer", offer);
+        console.log("Offer sent to server:", offer);
+      }
+    },
     async getCameras() {
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
