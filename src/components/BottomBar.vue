@@ -2,6 +2,16 @@
   <v-footer app>
     <v-container fluid>
       <v-row align="center" justify="center">
+
+        <!-- Connect Button -->
+        <v-btn 
+          icon 
+          @click="$emit('connect')" 
+          class="mx-3"
+        >
+          <v-icon>mdi-wifi</v-icon>
+        </v-btn>
+
         <!-- Camera Device Selection -->
         <v-select
           label="Select Camera"

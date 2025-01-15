@@ -2,7 +2,7 @@
   <v-app>
     <v-main>
       <!-- Signal Client -->
-      <SignalClient />
+      <!-- <SignalClient /> -->
 
       <ScreenContent 
         :isCameraRunning="isCameraRunning" 
@@ -15,9 +15,16 @@
     </v-main>
 
     <!-- Bottom Bar for Controls -->
-    <BottomBar :participantCount="0" :cameraOptions="cameras" :selectedCameraId="selectedCameraId"
-      :isScreenSharing="!!screenStream" @toggle-camera="toggleCamera" @update-camera="updateSelectedCamera"
-      @share-screen="showScreenSelection" @stop-screen-share="stopScreenShare" />
+    <BottomBar 
+    :participantCount="0" 
+    :cameraOptions="cameras" 
+    :selectedCameraId="selectedCameraId"
+    :isScreenSharing="!!screenStream" 
+    @connect="handleConnect"
+    @toggle-camera="toggleCamera" 
+    @update-camera="updateSelectedCamera"
+    @share-screen="showScreenSelection" 
+    @stop-screen-share="stopScreenShare" />
   </v-app>
 </template>
 
@@ -25,6 +32,8 @@
 import SignalClient from "./components/SignalClient.vue";
 import BottomBar from "./components/BottomBar.vue";
 import ScreenContent from "./components/ScreenContent.vue";
+import { io } from "socket.io-client";
+
 
 export default {
   name: "App",
@@ -41,6 +50,42 @@ export default {
     };
   },
   methods: {
+    handleConnect() {
+  console.log("Connect button clicked");
+
+  // Check if the socket connection already exists
+  if (!this.socket) {
+    // Create a new socket connection if not already connected
+    this.socket = io("http://localhost:8181", {
+      auth: {
+        userName: "vue", // Unique username for the Vue app
+        password: "x", // Matches the server requirement
+      },
+    });
+
+    // Handle connection
+    this.socket.on("connect", () => {
+      console.log("Vue connected to server with ID:", this.socket.id);
+    });
+
+    // Handle new answers
+    this.socket.on("answerResponse", (offerObj) => {
+      console.log("Answer received from server:", offerObj);
+    });
+
+    this.socket.on("disconnect", () => {
+      console.log("Socket disconnected");
+    });
+  }
+
+  // Always send a new offer, regardless of whether the socket was newly created
+  const offer = {
+    sdp: "sample-sdp-offer-from-vue", // Replace with a mock SDP
+    type: "offer",
+  };
+  this.socket.emit("newOffer", offer);
+  console.log("Offer sent to server:", offer);
+},
     async getCameras() {
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
