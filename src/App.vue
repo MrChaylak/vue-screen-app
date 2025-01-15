@@ -20,6 +20,7 @@
     :cameraOptions="cameras" 
     :selectedCameraId="selectedCameraId"
     :isScreenSharing="!!screenStream" 
+    :isConnected="isConnected"
     @connect="handleConnect"
     @toggle-camera="toggleCamera" 
     @update-camera="updateSelectedCamera"
@@ -47,6 +48,7 @@ export default {
       screenStream: null,
       screenSources: [],
       showScreenDialog: false,
+      isConnected: false, // Tracks connection state
     };
   },
   methods: {
@@ -71,6 +73,7 @@ export default {
           // Handle connection
           this.socket.on("connect", () => {
             console.log("Vue connected to server with ID:", this.socket.id);
+            this.isConnected = true; // Update connection state
           });
 
           // Handle new answers
@@ -80,6 +83,7 @@ export default {
 
           this.socket.on("disconnect", () => {
             console.log("Socket disconnected");
+          this.isConnected = false; // Update connection state
           });
 
         // Always send a new offer, regardless of whether the socket was newly created
