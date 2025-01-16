@@ -48,53 +48,101 @@ export default {
       screenStream: null,
       screenSources: [],
       showScreenDialog: false,
-      isConnected: false, // Tracks connection state
+      socket: null,
+      isConnected: false,
+      peerConnection: null,
+      dataChannel: null,
     };
   },
   methods: {
-    handleConnect() {
+    async handleConnect() {
       console.log("Connect button clicked");
 
       if (this.socket && this.socket.connected) {
-        // If socket is already connected, disconnect it
+        // Disconnect if already connected
         console.log("Disconnecting socket:", this.socket.id);
         this.socket.disconnect();
-        this.socket = null; // Clear the socket reference
+        this.socket = null;
+        this.isConnected = false;
       } else {
-        // Create a new socket connection if not already connected
-
+        // Create a new socket connection
         this.socket = io("http://localhost:8181", {
           auth: {
-            userName: "vue", // Unique username for the Vue app
-            password: "x", // Matches the server requirement
+            userName: "vue",
+            password: "x",
           },
         });
 
-          // Handle connection
-          this.socket.on("connect", () => {
-            console.log("Vue connected to server with ID:", this.socket.id);
-            this.isConnected = true; // Update connection state
-          });
+        // Set up WebRTC
+        await this.setupWebRTC();
 
-          // Handle new answers
-          this.socket.on("answerResponse", (offerObj) => {
-            console.log("Answer received from server:", offerObj);
-          });
+        // Handle socket events
+        this.socket.on("connect", () => {
+          console.log("Vue connected to server with ID:", this.socket.id);
+          this.isConnected = true;
+        });
 
-          this.socket.on("disconnect", () => {
-            console.log("Socket disconnected");
-          this.isConnected = false; // Update connection state
-          });
+        this.socket.on("answerResponse", async (answer) => {
+          console.log("Answer received from server:", answer);
+          await this.peerConnection.setRemoteDescription(
+            new RTCSessionDescription(answer)
+          );
+        });
 
-        // Always send a new offer, regardless of whether the socket was newly created
-        const offer = {
-          sdp: "sample-sdp-offer-from-vue", // Replace with a mock SDP
-          type: "offer",
-        };
-        this.socket.emit("newOffer", offer);
-        console.log("Offer sent to server:", offer);
+        this.socket.on("iceCandidate", (data) => {
+  const { candidate, didIOffer } = data;
+  if (!didIOffer) { // Only add if the candidate is from the answerer
+    console.log("Received ICE candidate from answerer:", candidate);
+    this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+  }
+});
+
+        this.socket.on("disconnect", () => {
+          console.log("Socket disconnected");
+          this.isConnected = false;
+        });
       }
     },
+
+    async setupWebRTC() {
+  // Create a new RTCPeerConnection
+  this.peerConnection = new RTCPeerConnection({
+    iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+  });
+
+  // Set up a data channel
+  this.dataChannel = this.peerConnection.createDataChannel("chat");
+  this.dataChannel.onopen = () => {
+    console.log("Data channel opened!");
+    this.dataChannel.send("Hello from Vue!");
+  };
+  this.dataChannel.onmessage = (event) => {
+    console.log("Message received:", event.data);
+  };
+
+  // Handle ICE candidates
+  this.peerConnection.onicecandidate = (event) => {
+    if (event.candidate) {
+      console.log("Sending ICE candidate:", event.candidate);
+      this.socket.emit("iceCandidate", {
+        candidate: event.candidate,
+        userName: "vue",
+        didIOffer: true, // Indicates this candidate is from the offerer
+      });
+    }
+  };
+
+  // Create an offer
+  const offer = await this.peerConnection.createOffer();
+  await this.peerConnection.setLocalDescription(offer);
+  console.log("Offer created:", offer);
+
+  // Send the offer to the server
+  this.socket.emit("newOffer", {
+    type: offer.type, // Ensure the type is included
+    sdp: offer.sdp,   // Include the SDP
+  });
+},
     async getCameras() {
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
