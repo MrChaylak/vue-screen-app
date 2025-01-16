@@ -16,16 +16,16 @@
 
     <!-- Bottom Bar for Controls -->
     <BottomBar 
-    :participantCount="0" 
-    :cameraOptions="cameras" 
-    :selectedCameraId="selectedCameraId"
-    :isScreenSharing="!!screenStream" 
-    :isConnected="isConnected"
-    @connect="handleConnect"
-    @toggle-camera="toggleCamera" 
-    @update-camera="updateSelectedCamera"
-    @share-screen="showScreenSelection" 
-    @stop-screen-share="stopScreenShare" />
+      :participantCount="0" 
+      :cameraOptions="cameras" 
+      :selectedCameraId="selectedCameraId"
+      :isScreenSharing="!!screenStream" 
+      :isConnected="isConnected"
+      @connect="handleConnect"
+      @toggle-camera="toggleCamera" 
+      @update-camera="updateSelectedCamera"
+      @share-screen="showScreenSelection" 
+      @stop-screen-share="stopScreenShare" />
   </v-app>
 </template>
 
@@ -35,13 +35,12 @@ import BottomBar from "./components/BottomBar.vue";
 import ScreenContent from "./components/ScreenContent.vue";
 import { io } from "socket.io-client";
 
-
 export default {
   name: "App",
   components: { SignalClient, BottomBar, ScreenContent },
   data() {
     return {
-      cameras: [],
+      cameras: [], // List of camera options
       selectedCameraId: null,
       isCameraRunning: false,
       currentStream: null,
@@ -90,12 +89,12 @@ export default {
         });
 
         this.socket.on("iceCandidate", (data) => {
-  const { candidate, didIOffer } = data;
-  if (!didIOffer) { // Only add if the candidate is from the answerer
-    console.log("Received ICE candidate from answerer:", candidate);
-    this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-  }
-});
+          const { candidate, didIOffer } = data;
+          if (!didIOffer) { // Only add if the candidate is from the answerer
+            console.log("Received ICE candidate from answerer:", candidate);
+            this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+          }
+        });
 
         this.socket.on("disconnect", () => {
           console.log("Socket disconnected");
@@ -105,145 +104,52 @@ export default {
     },
 
     async setupWebRTC() {
-  // Create a new RTCPeerConnection
-  this.peerConnection = new RTCPeerConnection({
-    iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-  });
-
-  // Set up a data channel
-  this.dataChannel = this.peerConnection.createDataChannel("chat");
-  this.dataChannel.onopen = () => {
-    console.log("Data channel opened!");
-    this.dataChannel.send("Hello from Vue!");
-  };
-  this.dataChannel.onmessage = (event) => {
-    console.log("Message received:", event.data);
-  };
-
-  // Handle ICE candidates
-  this.peerConnection.onicecandidate = (event) => {
-    if (event.candidate) {
-      console.log("Sending ICE candidate:", event.candidate);
-      this.socket.emit("iceCandidate", {
-        candidate: event.candidate,
-        userName: "vue",
-        didIOffer: true, // Indicates this candidate is from the offerer
+      // Create a new RTCPeerConnection
+      this.peerConnection = new RTCPeerConnection({
+        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
       });
-    }
-  };
 
-  // Create an offer
-  const offer = await this.peerConnection.createOffer();
-  await this.peerConnection.setLocalDescription(offer);
-  console.log("Offer created:", offer);
+      // Set up a data channel
+      this.dataChannel = this.peerConnection.createDataChannel("chat");
+      this.dataChannel.onopen = () => {
+        console.log("Data channel opened!");
+        this.dataChannel.send("Hello from Vue!");
+      };
 
-  // Send the offer to the server
-  this.socket.emit("newOffer", {
-    type: offer.type, // Ensure the type is included
-    sdp: offer.sdp,   // Include the SDP
-  });
-},
-    async getCameras() {
-      try {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        this.cameras = devices
-          .filter(device => device.kind === "videoinput")
-          .map((device, index) => ({
-            label: device.label || `Camera ${index + 1}`,
-            deviceId: device.deviceId,
-          }));
-        if (this.cameras.length > 0) {
-          this.selectedCameraId = this.cameras[0].deviceId;
+      this.dataChannel.onmessage = (event) => {
+        console.log("Message received:", event.data);
+
+        // Parse the received message
+        const message = JSON.parse(event.data);
+        if (message.type === "cameraOptions") {
+          console.log("Received camera options:", message.cameras);
+          this.cameras = message.cameras; // Update the camera list
         }
-      } catch (error) {
-        console.error("Error getting cameras:", error);
-      }
-    },
-    async showScreenSelection() {
-      // try {
-      //   const sources = await window.electron.getSources();
-      //   this.screenSources = sources.map(source => ({
-      //     id: source.id,
-      //     name: source.name,
-      //     thumbnail: source.thumbnail.toDataURL(),
-      //   }));
-      //   this.showScreenDialog = true;
-      // } catch (error) {
-      //   console.error("Error fetching screens:", error);
-      // }
-      this.screenSources = [
-        { id: "1", name: "Screen 1", thumbnail: "example1.jpg" },
-        { id: "2", name: "Screen 2", thumbnail: "example2.jpg" },
-      ];
-      console.log('showScreenSelection called');
-      this.showScreenDialog = true;
-    },
-    async startScreenShare(source) {
-      try {
-        this.showScreenDialog = false;
+      };
 
-        const constraints = {
-          audio: false,
-          video: {
-            mandatory: {
-              chromeMediaSource: "desktop",
-              chromeMediaSourceId: source.id,
-            },
-          },
-        };
+      // Handle ICE candidates
+      this.peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+          console.log("Sending ICE candidate:", event.candidate);
+          this.socket.emit("iceCandidate", {
+            candidate: event.candidate,
+            userName: "vue",
+            didIOffer: true, // Indicates this candidate is from the offerer
+          });
+        }
+      };
 
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        this.screenStream = stream;
+      // Create an offer
+      const offer = await this.peerConnection.createOffer();
+      await this.peerConnection.setLocalDescription(offer);
+      console.log("Offer created:", offer);
 
-        const videoElement = this.$refs.screenVideo;
-        videoElement.srcObject = stream;
-      } catch (error) {
-        console.error("Error starting screen share:", error);
-      }
+      // Send the offer to the server
+      this.socket.emit("newOffer", {
+        type: offer.type, // Ensure the type is included
+        sdp: offer.sdp,   // Include the SDP
+      });
     },
-    stopScreenShare() {
-      if (this.screenStream) {
-        this.screenStream.getTracks().forEach(track => track.stop());
-        this.screenStream = null;
-      }
-    },
-    toggleCamera(isOn, selectedDeviceId) {
-      if (isOn) {
-        this.startWebcam(selectedDeviceId || this.selectedCameraId);
-      } else {
-        this.stopWebcam();
-      }
-    },
-    updateSelectedCamera(deviceId) {
-      this.selectedCameraId = deviceId;
-    },
-    async startWebcam(deviceId) {
-      if (this.currentStream) {
-        this.stopWebcam();
-      }
-      try {
-        const constraints = {
-          video: {
-            deviceId: deviceId ? { exact: deviceId } : undefined,
-          },
-        };
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        this.currentStream = stream;
-        this.isCameraRunning = true;
-      } catch (error) {
-        console.error("Error starting webcam:", error);
-      }
-    },
-    stopWebcam() {
-      if (this.currentStream) {
-        this.currentStream.getTracks().forEach(track => track.stop());
-        this.currentStream = null;
-        this.isCameraRunning = false;
-      }
-    },
-  },
-  mounted() {
-    this.getCameras();
   },
 };
 </script>
