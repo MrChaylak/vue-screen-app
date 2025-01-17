@@ -4,27 +4,15 @@
       <!-- Signal Client -->
       <!-- <SignalClient /> -->
 
-      <ScreenContent 
-        :isCameraRunning="isCameraRunning" 
-        :currentStream="currentStream" 
-        :screenSources="screenSources"
-        :showScreenDialog="showScreenDialog"
-        :screenStream="screenStream"
-        @update:showScreenDialog="value => showScreenDialog = value"
-        @startScreenShare="startScreenShare" />
+      <ScreenContent :isCameraRunning="isCameraRunning" :currentStream="currentStream" :screenSources="screenSources"
+        :showScreenDialog="showScreenDialog" :screenStream="screenStream"
+        @update:showScreenDialog="value => showScreenDialog = value" @startScreenShare="startScreenShare" />
     </v-main>
 
     <!-- Bottom Bar for Controls -->
-    <BottomBar 
-      :participantCount="0" 
-      :cameraOptions="cameras" 
-      :selectedCameraId="selectedCameraId"
-      :isScreenSharing="!!screenStream" 
-      :isConnected="isConnected"
-      @connect="handleConnect"
-      @toggle-camera="toggleCamera" 
-      @update-camera="updateSelectedCamera"
-      @share-screen="showScreenSelection" 
+    <BottomBar :participantCount="0" :cameraOptions="cameras" :selectedCameraId="selectedCameraId"
+      :isScreenSharing="!!screenStream" :isConnected="isConnected" @connect="handleConnect"
+      @toggle-camera="toggleCamera" @update-camera="updateSelectedCamera" @share-screen="showScreenSelection"
       @stop-screen-share="stopScreenShare" />
   </v-app>
 </template>
@@ -108,12 +96,23 @@ export default {
       this.peerConnection = new RTCPeerConnection({
         iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
       });
+      this.peerConnection.addTransceiver("video", { direction: "sendrecv" });
+      //peerconnection on open event listenerı ekle
+      this.peerConnection.ontrack = (event) => {
+        console.log("Remote track added:", event.streams[0]);
+
+        this.currentStream = event.streams[0];
+        this.isCameraRunning = true;
+        console.log("Remote stream added:", event.streams[0]);
+
+      };
+
 
       // Set up a data channel
       this.dataChannel = this.peerConnection.createDataChannel("chat");
       this.dataChannel.onopen = () => {
         console.log("Data channel opened!");
-        this.dataChannel.send("Hello from Vue!");
+        // this.dataChannel.send("Hello from Vue!");
       };
 
       this.dataChannel.onmessage = (event) => {
@@ -139,6 +138,9 @@ export default {
         }
       };
 
+
+
+
       // Create an offer
       const offer = await this.peerConnection.createOffer();
       await this.peerConnection.setLocalDescription(offer);
@@ -149,6 +151,25 @@ export default {
         type: offer.type, // Ensure the type is included
         sdp: offer.sdp,   // Include the SDP
       });
+    },
+    updateSelectedCamera(deviceId) {
+      this.selectedCameraId = deviceId;
+      console.log("Selected camera updated:", deviceId);
+    },
+    toggleCamera(isOn, selectedDeviceId) {
+      if (isOn) {
+        if (this.dataChannel && this.dataChannel.readyState === "open") {
+          console.log("Sending selected camera to Electron:", selectedDeviceId);
+          this.dataChannel.send(JSON.stringify({ type: "selectedCamera", selectedDeviceId }));
+        } else {
+          console.warn("Data channel is not open. Cannot send selected camera.");
+        }
+      } else {
+        // this.stopWebcam();
+        // this.currentStream.getTracks().forEach(track => track.stop());
+        // this.currentStream = null;
+        // this.isCameraRunning = false;
+      }
     },
   },
 };

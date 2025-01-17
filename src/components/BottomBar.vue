@@ -17,7 +17,7 @@
           label="Select Camera"
           v-model="selectedCamera"
           :items="cameraOptions"
-          item-text="label"
+          item-title="label"
           item-value="deviceId"
           class="mx-3"
           dense
