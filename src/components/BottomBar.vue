@@ -3,15 +3,6 @@
     <v-container fluid>
       <v-row align="center" justify="center">
 
-        <!-- Connect/Disconnect Button -->
-        <v-btn 
-          icon 
-          @click="$emit('connect')" 
-          class="mx-3"
-        >
-        <v-icon>{{ isConnected ? 'mdi-wifi-off' : 'mdi-wifi' }}</v-icon>
-        </v-btn>
-
         <!-- Camera Device Selection -->
         <v-select
           label="Select Camera"
@@ -66,14 +57,6 @@ import { ref, computed } from 'vue';
 export default {
   name: 'BottomBar',
   props: {
-    isConnected: {
-      type: Boolean,
-      required: true,
-    },
-    participantCount: {
-      type: Number,
-      required: true
-    },
     cameraOptions: {
       type: Array,
       required: true
