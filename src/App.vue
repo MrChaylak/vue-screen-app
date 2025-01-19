@@ -9,8 +9,8 @@
           </v-col>
 
           <!-- Right Side: Camera Component -->
-          <v-col cols="12" md="3" class="d-flex align-end">
-            <CameraComponent class="camera-component" />
+          <v-col cols="12" md="3" class="d-flex flex-column">
+            <CameraComponent class="flex-grow-1" />
           </v-col>
         </v-row>
       </v-container>

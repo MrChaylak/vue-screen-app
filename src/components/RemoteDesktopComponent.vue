@@ -1,18 +1,8 @@
 <template>
-    <v-card class="pa-4">
+    <v-card class="pa-4 pt-0">
       <v-card-text>
         <v-container>
           <v-row align="center">
-            <v-col cols="auto">
-              <v-select
-                v-model="selectedScreen"
-                :items="screens"
-                item-title="name"   
-                item-value="id"
-                label="Select a Screen"
-                style="width: 800px;"
-              ></v-select>
-            </v-col>
             <v-col cols="auto">
               <!-- Single Toggle Button -->
               <v-btn
@@ -20,51 +10,92 @@
                 :color="isScreenSharing ? 'error' : 'success'"
                 class="mt-2"
               >
-                <v-icon>{{ isScreenSharing ? 'mdi-monitor-off' : 'mdi-monitor-share' }}</v-icon>
+              <v-icon>{{ isScreenSharing ? 'mdi-monitor-off' : 'mdi-monitor-share' }}</v-icon>
+              &nbsp;{{ isScreenSharing ? 'Stop Screen Share' : 'Start Screen Share' }}
               </v-btn>
+              <v-btn icon @click="toggleTheme" class="mx-3">
+          <v-icon>{{ isDarkTheme ? 'mdi-white-balance-sunny' : 'mdi-moon-waning-crescent' }}</v-icon>
+        </v-btn>
             </v-col>
           </v-row>
         </v-container>
       </v-card-text>
       <v-card-actions>
         <v-responsive>
-          <video
-            id="remote-desktop-video"
-            autoplay
-            playsinline
-            tabindex="0"
-            style="width: 100%; border: 1px solid #ccc; cursor: crosshair;"
-          ></video>
+            <div style="position: relative; width: 100%; padding-bottom: 56.25%; overflow: hidden;">
+                <video
+                id="remote-desktop-video"
+                autoplay
+                playsinline
+                tabindex="0"
+                style="position: absolute; margin-top: 0; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; border: 1px solid #ccc; cursor: crosshair;"
+                ></video>
+            </div>
         </v-responsive>
       </v-card-actions>
+  
+      <!-- Screen Selection Dialog -->
+      <v-dialog v-model="screenSelectionDialog" max-width="800">
+        <v-card>
+          <v-card-title>Select a Screen</v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-row>
+                <!-- Display screen options with thumbnails -->
+                <v-col
+                  v-for="screen in screens"
+                  :key="screen.id"
+                  cols="12"
+                  md="4"
+                >
+                  <v-card @click="selectScreen(screen)" class="screen-option">
+                    <v-img :src="screen.thumbnail" aspect-ratio="16/9" cover></v-img>
+                    <v-card-title class="text-center">{{ screen.name }}</v-card-title>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn @click="closeScreenSelectionDialog" color="primary">Close</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-card>
   </template>
   
   <script lang="ts">
-  import { defineComponent, nextTick, onMounted, ref, onUnmounted } from "vue";
+  import { useTheme } from 'vuetify';
+  import { defineComponent, nextTick, onMounted, ref, onUnmounted, computed } from "vue";
   import { WebRTCClient } from "@/service/signaling";
   
   export default defineComponent({
     name: "RemoteDesktopComponent",
     setup() {
       const webrtcClient = ref<WebRTCClient | null>(null);
-      const screens = ref<Array<{ id: string; name: string }>>([]);
+      const screens = ref<Array<{ id: string; name: string; thumbnail: string }>>([]);
       const selectedScreen = ref<string>("");
       const videoElement = ref<HTMLVideoElement | null>(null);
       const isScreenSharing = ref(false); // Track screen share status
       const sharedScreen = ref<string>("");
-      let screenListInterval: number | null = null; // Store the interval ID
-  
+      const screenSelectionDialog = ref(false); // Control dialog visibility
+      let screenListInterval: number | null = null; // Store the interval ID     
+      const theme = useTheme();
+
+    // Computed to know if the current theme is dark
+    const isDarkTheme = computed(() => theme.global.current.value.dark);
+
+    const toggleTheme = () => {
+      // Toggle between light and dark themes
+      theme.global.name.value = isDarkTheme.value ? 'light' : 'dark';
+    };
+
       const getScreenList = () => {
         webrtcClient.value?.requestScreenList();
       };
   
       const startScreenShare = () => {
-        if (isScreenSharing.value && sharedScreen.value !== selectedScreen.value) {
-          stopScreenShare();
-        } else if (isScreenSharing.value && sharedScreen.value === selectedScreen.value) {
-          return;
-        }
         if (selectedScreen.value) {
           webrtcClient.value?.startScreenShare(selectedScreen.value);
           isScreenSharing.value = true; // Mark screen share as active
@@ -89,8 +120,23 @@
         if (isScreenSharing.value) {
           stopScreenShare();
         } else {
-          startScreenShare();
+          openScreenSelectionDialog();
         }
+      };
+  
+      const openScreenSelectionDialog = () => {
+        screenSelectionDialog.value = true;
+        getScreenList(); // Fetch the latest screen list when the dialog is opened
+      };
+  
+      const closeScreenSelectionDialog = () => {
+        screenSelectionDialog.value = false;
+      };
+  
+      const selectScreen = (screen: { id: string; name: string; thumbnail: string }) => {
+        selectedScreen.value = screen.id;
+        closeScreenSelectionDialog(); // Close the dialog after selection
+        startScreenShare(); // Automatically start screen sharing after selecting a screen
       };
   
       onMounted(() => {
@@ -120,6 +166,7 @@
           screens.value = screenList.map((screen) => ({
             name: screen.name || `Screen ${screen.id}`,
             id: screen.id,
+            thumbnail: screen.thumbnail, // Ensure the thumbnail is included
           }));
         };
   
@@ -144,14 +191,25 @@
         videoElement,
         isScreenSharing,
         sharedScreen,
+        screenSelectionDialog,
+        openScreenSelectionDialog,
+        closeScreenSelectionDialog,
+        selectScreen,
+        theme,
+        toggleTheme,
+        isDarkTheme
       };
     },
   });
   </script>
   
   <style>
-  video {
-    width: 100%;
-    border: 1px solid #ccc;
+  .screen-option {
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  
+  .screen-option:hover {
+    transform: scale(1.05);
   }
   </style>

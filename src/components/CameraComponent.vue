@@ -13,12 +13,12 @@
                 style="width: 150px;"
               ></v-select>
             </v-col>
-            <v-col cols="auto">
+            <v-col cols="auto" class="pt-0">
               <!-- Single Toggle Button -->
               <v-btn
                 @click="toggleCamera"
                 :color="isCameraSharing ? 'error' : 'success'"
-                class="mt-2"
+                class="mt-2 mt-md-0"
               >
                 <v-icon>{{ isCameraSharing ? 'mdi-camera-off' : 'mdi-camera' }}</v-icon>
               </v-btn>

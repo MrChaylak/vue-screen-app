@@ -4,7 +4,7 @@ export class WebRTCClient {
     remoteStream: MediaStream | null = null;
     onRemoteStream: ((stream: MediaStream) => void) | null = null;
     onCameraList: ((cameras: Array<{ deviceId: string; label: string }>) => void) | null = null;
-    onScreenList: ((screens: Array<{ id: string; name: string }>) => void) | null = null;
+    onScreenList: ((screens: Array<{ id: string; name: string; thumbnail: string }>) => void) | null = null;
     dataChannel!: RTCDataChannel;
     id: string;
 
