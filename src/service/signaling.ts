@@ -23,6 +23,18 @@ export class WebRTCClient {
     createPeerConnection() {
         this.peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
 
+        this.peerConnection.ondatachannel = (event) => {
+            const dataChannel = event.channel;
+            dataChannel.onopen = () => {
+                console.log(`Data channel opened for ${this.id}`);
+            };
+            dataChannel.onmessage = (event) => {
+                console.log(`Received data channel message on ${this.id}:`, event.data);
+                this.handleDataChannelMessage(event.data);
+            };
+            this.dataChannel = dataChannel;
+        }
+
         this.peerConnection.onicecandidate = (event) => {
             if (event.candidate) {
                 this.signalingServer.send(JSON.stringify({ type: 'ice-candidate', id: this.id, candidate: event.candidate }));
@@ -131,5 +143,71 @@ export class WebRTCClient {
             this.createPeerConnection(); // Recreate the peer connection
         }
 
+    }
+
+    sendMouseMove(x: number, y: number) {
+        if (this.dataChannel && this.dataChannel.readyState === 'open') {
+            const message = JSON.stringify({ type: 'mouse-move', x, y });
+            this.dataChannel.send(message);
+        } else {
+            console.error('Data channel is not open');
+        }
+    }
+
+    sendMouseClick(button = 'left', doubleClick = false) {
+        if (this.dataChannel && this.dataChannel.readyState === 'open') {
+            const message = JSON.stringify({ type: 'mouse-click', button, doubleClick });
+            this.dataChannel.send(message);
+        } else {
+            console.error('Data channel is not open');
+        }
+    }
+
+    sendKeyPress(key: string, modifiers: string[] = []) {
+        if (this.dataChannel && this.dataChannel.readyState === 'open') {
+            const message = JSON.stringify({ type: 'key-press', key, modifiers });
+            this.dataChannel.send(message);
+        } else {
+            console.error('Data channel is not open');
+        }
+    }
+
+    sendMouseScroll(x: number, y: number) {
+        if (this.dataChannel && this.dataChannel.readyState === 'open') {
+            const message = JSON.stringify({ type: 'mouse-scroll', x, y });
+            this.dataChannel.send(message);
+        } else {
+            console.error('Data channel is not open');
+        }
+    }
+
+    handleDataChannelMessage(data: string) {
+        console.log(`Data channel message received: ${data}`);
+    }
+
+    cleanup() {
+        // Stop any active camera or screen sharing
+        this.stopCamera();
+        this.stopScreenShare();
+
+        // Close the peer connection
+        if (this.peerConnection) {
+            this.peerConnection.getSenders().forEach((sender) => {
+                if (sender.track) {
+                    sender.track.stop(); // Stop the track
+                }
+            });
+            this.peerConnection.close(); // Close the connection
+        }
+
+        // Reset the remote stream
+        this.remoteStream = null;
+
+        // Close the signaling server connection
+        if (this.signalingServer && this.signalingServer.readyState === WebSocket.OPEN) {
+            this.signalingServer.close();
+        }
+
+        console.log('WebRTCClient cleanup completed.');
     }
 }

@@ -13,6 +13,9 @@
               <v-icon>{{ isScreenSharing ? 'mdi-monitor-off' : 'mdi-monitor-share' }}</v-icon>
               &nbsp;{{ isScreenSharing ? 'Stop Screen Share' : 'Start Screen Share' }}
               </v-btn>
+              <v-btn @click="toggleFullscreen" color="primary" class="mt-2">
+          Toggle Fullscreen
+        </v-btn>
               <v-btn icon @click="toggleTheme" class="mx-3">
           <v-icon>{{ isDarkTheme ? 'mdi-white-balance-sunny' : 'mdi-moon-waning-crescent' }}</v-icon>
         </v-btn>
@@ -29,6 +32,17 @@
                 playsinline
                 tabindex="0"
                 style="position: absolute; margin-top: 0; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; border: 1px solid #ccc; cursor: crosshair;"
+                @mousemove="handleMouseMove"
+
+            @click="handleMouseClick"
+
+            @dblclick="handleMouseDoubleClick"
+
+            @wheel="handleMouseWheel"
+
+            @contextmenu.prevent="handleMouseClick"
+
+            @keypress="handleKeypress"
                 ></video>
             </div>
         </v-responsive>
@@ -140,6 +154,11 @@
       };
   
       onMounted(() => {
+
+        if (screenListInterval) {
+          clearInterval(screenListInterval);
+        }
+
         videoElement.value = document.getElementById("remote-desktop-video") as HTMLVideoElement;
   
         if (!videoElement.value) {
@@ -174,12 +193,75 @@
         screenListInterval = setInterval(getScreenList, 5000);
       });
   
-      // Clear the interval when the component is unmounted
-      onUnmounted(() => {
-        if (screenListInterval) {
-          clearInterval(screenListInterval);
+      const handleMouseMove = (event: MouseEvent) => {
+      if (!isScreenSharing.value) return; // Skip if screen sharing is not active
+
+      const rect = (event.target as HTMLVideoElement).getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 1920; // Adjust for resolution
+      const y = ((event.clientY - rect.top) / rect.height) * 1080;
+      webrtcClient.value?.sendMouseMove(x, y);
+    };
+
+    const handleMouseClick = (event: MouseEvent) => {
+
+      if (!isScreenSharing.value) return; // Skip if screen sharing is not active
+
+      event.preventDefault(); // Prevent default actions like context menu
+
+      const button = event.button === 2 ? "right" : "left";
+      webrtcClient.value?.sendMouseClick(button);
+    };
+
+    const handleMouseDoubleClick = (event: MouseEvent) => {
+      if (!isScreenSharing.value) return; // Skip if screen sharing is not active
+
+      event.preventDefault(); // Prevent default actions like context menu
+
+      const button = event.button === 2 ? "right" : "left";
+      webrtcClient.value?.sendMouseClick(button, true);
+
+      if (videoElement.value) {
+        videoElement.value.focus(); // Ensure the video element is focused
+      }
+    };
+
+    const handleKeypress = (event: KeyboardEvent) => {
+      if (!isScreenSharing.value) return; // Skip if screen sharing is not active
+
+      event.preventDefault(); // Prevent default actions like backspace navigation
+
+      const modifiers = [];
+      if (event.ctrlKey) modifiers.push("ctrl");
+      if (event.altKey) modifiers.push("alt");
+      if (event.shiftKey) modifiers.push("shift");
+      if (event.metaKey) modifiers.push("command");
+
+      webrtcClient.value?.sendKeyPress(event.key, modifiers);
+    };
+
+    const handleMouseWheel = (event: WheelEvent) => {
+      if (!isScreenSharing.value) return; // Skip if screen sharing is not active
+
+      event.preventDefault(); // Prevent default actions like scrolling
+
+      const deltaX = event.deltaX;
+      const deltaY = - event.deltaY;
+      webrtcClient.value?.sendMouseScroll(deltaX, deltaY);
+    };
+
+    const toggleFullscreen = () => {
+      if (videoElement.value) {
+        if (!document.fullscreenElement) {
+          videoElement.value.requestFullscreen().catch((err) => {
+            console.error("Error attempting to enable fullscreen mode:", err);
+          });
+        } else {
+          document.exitFullscreen().catch((err) => {
+            console.error("Error attempting to exit fullscreen mode:", err);
+          });
         }
-      });
+      }
+    };
   
       return {
         getScreenList,
@@ -197,7 +279,13 @@
         selectScreen,
         theme,
         toggleTheme,
-        isDarkTheme
+        isDarkTheme,
+        handleMouseMove,
+        handleMouseClick,
+        handleMouseWheel,
+        handleMouseDoubleClick,
+        handleKeypress,
+        toggleFullscreen,
       };
     },
   });

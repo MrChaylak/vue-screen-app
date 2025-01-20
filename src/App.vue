@@ -18,7 +18,7 @@
   </v-app>
 </template>
 
-<script>
+<script lang="ts">
 import CameraComponent from './components/CameraComponent.vue';
 import RemoteDesktopComponent from './components/RemoteDesktopComponent.vue';
 

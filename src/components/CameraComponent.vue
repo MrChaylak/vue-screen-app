@@ -15,12 +15,8 @@
             </v-col>
             <v-col cols="auto" class="pt-0">
               <!-- Single Toggle Button -->
-              <v-btn
-                @click="toggleCamera"
-                :color="isCameraSharing ? 'error' : 'success'"
-                class="mt-2 mt-md-0"
-              >
-                <v-icon>{{ isCameraSharing ? 'mdi-camera-off' : 'mdi-camera' }}</v-icon>
+              <v-btn icon @click="toggleCamera" class="mx-3">
+                <v-icon>{{ isCameraSharing ? 'mdi-camera' : 'mdi-camera-off' }}</v-icon>
               </v-btn>
             </v-col>
           </v-row>
