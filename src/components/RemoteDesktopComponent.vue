@@ -8,13 +8,12 @@
               <v-btn
                 @click="toggleScreenShare"
                 :color="isScreenSharing ? 'error' : 'success'"
-                class="mt-2"
               >
               <v-icon>{{ isScreenSharing ? 'mdi-monitor-off' : 'mdi-monitor-share' }}</v-icon>
               &nbsp;{{ isScreenSharing ? 'Stop Screen Share' : 'Start Screen Share' }}
               </v-btn>
-              <v-btn @click="toggleFullscreen" color="primary" class="mt-2">
-          Toggle Fullscreen
+              <v-btn @click="toggleFullscreen" color="primary" class="mx-3">
+          Fullscreen
         </v-btn>
               <v-btn icon @click="toggleTheme" class="mx-3">
           <v-icon>{{ isDarkTheme ? 'mdi-white-balance-sunny' : 'mdi-moon-waning-crescent' }}</v-icon>
