@@ -1,52 +1,92 @@
 <template>
   <v-app>
     <v-main>
-      <v-container fluid class="fill-height pa-0">
-        <v-row no-gutters class="fill-height">
-          <!-- Left Side: Remote Desktop Component -->
-          <v-col cols="12" md="9" class="fill-height">
-            <RemoteDesktopComponent class="fill-height" />
-          </v-col>
+      <RouterView />
 
-          <!-- Right Side: Camera Component -->
-          <v-col cols="12" md="3" class="d-flex flex-column">
-            <CameraComponent class="flex-grow-1" />
-          </v-col>
-        </v-row>
-      </v-container>
+      <v-bottom-navigation
+        class="bottom-navigation"
+        grow
+        color="primary"
+      >
+        <v-btn value="home" to="/" exact>
+          <v-icon>mdi-home</v-icon>
+          <span>Home</span>
+        </v-btn>
+
+        <v-btn value="screen-share" to="/screen-share">
+          <v-icon>mdi-monitor-screenshot</v-icon>
+          <span>Remote Screen Share</span>
+        </v-btn>
+
+        <v-btn value="onvif-camera" to="/onvif-camera">
+          <v-icon>mdi-cctv</v-icon>
+          <span>ONVIF Camera</span>
+        </v-btn>
+        <v-btn icon @click="toggleTheme" class="mx-3">
+          <v-icon>{{ isDarkTheme ? 'mdi-white-balance-sunny' : 'mdi-moon-waning-crescent' }}</v-icon>
+        </v-btn>
+      </v-bottom-navigation>
     </v-main>
   </v-app>
 </template>
 
 <script lang="ts">
-import CameraComponent from './components/CameraComponent.vue';
-import RemoteDesktopComponent from './components/RemoteDesktopComponent.vue';
+import { RouterLink, RouterView } from 'vue-router';
+import { useTheme } from 'vuetify';
+import { ref, computed } from 'vue';
 
 export default {
-  name: 'App',
-  components: {
-    CameraComponent,
-    RemoteDesktopComponent,
-  },
-  data() {
-    return {
-      cameras: [],
-      selectedCameraId: null,
-      isCameraRunning: false,
-      showScreenDialog: false,
-      screenStream: null,
-    };
-  },
+  setup() {
+      const theme = useTheme();
+
+      // Computed to know if the current theme is dark
+      const isDarkTheme = computed(() => theme.global.current.value.dark);
+
+      const toggleTheme = () => {
+        // Toggle between light and dark themes
+        theme.global.name.value = isDarkTheme.value ? 'light' : 'dark';
+      };
+
+      return { theme, toggleTheme, isDarkTheme };
+  }
 };
 </script>
 
-<style>
-.fill-height {
-  height: 100%;
+<style scoped>
+/* Custom styles for the bottom navigation */
+.bottom-navigation {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 1000;
+
+  /* Initially hidden */
+  opacity: 0;
+  transform: translateY(100%);
+  transition: opacity 0.3s, transform 0.3s;
 }
 
-.camera-component {
-  width: 100%;
-  height: auto;
+/* Show the navbar on hover */
+.bottom-navigation:hover {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Add an always-visible handle (optional, for better UX) */
+.bottom-navigation::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 5px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+span {
+  text-align: center;
 }
 </style>

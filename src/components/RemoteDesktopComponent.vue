@@ -13,11 +13,11 @@
               &nbsp;{{ isScreenSharing ? 'Stop Screen Share' : 'Start Screen Share' }}
               </v-btn>
               <v-btn @click="toggleFullscreen" color="primary" class="mx-3">
-          Fullscreen
-        </v-btn>
-              <v-btn icon @click="toggleTheme" class="mx-3">
-          <v-icon>{{ isDarkTheme ? 'mdi-white-balance-sunny' : 'mdi-moon-waning-crescent' }}</v-icon>
-        </v-btn>
+                Fullscreen
+              </v-btn>
+              <!-- <v-btn icon @click="toggleTheme" class="mx-3">
+                <v-icon>{{ isDarkTheme ? 'mdi-white-balance-sunny' : 'mdi-moon-waning-crescent' }}</v-icon>
+              </v-btn> -->
             </v-col>
           </v-row>
         </v-container>

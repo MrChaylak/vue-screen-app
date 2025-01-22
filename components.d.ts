@@ -10,6 +10,8 @@ declare module 'vue' {
     BottomBar: typeof import('./src/components/BottomBar.vue')['default']
     CameraComponent: typeof import('./src/components/CameraComponent.vue')['default']
     CameraDisplay: typeof import('./src/components/CameraDisplay.vue')['default']
+    HomeComponent: typeof import('./src/components/HomeComponent.vue')['default']
+    OnvifCameraComponent: typeof import('./src/components/OnvifCameraComponent.vue')['default']
     RemoteDesktopComponent: typeof import('./src/components/RemoteDesktopComponent.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

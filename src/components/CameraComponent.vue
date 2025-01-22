@@ -4,19 +4,11 @@
         <v-container>
           <v-row align="center">
             <v-col cols="auto">
-              <!-- <v-select
+              <v-select
                 v-model="selectedCamera"
                 :items="cameras"
                 item-title="label"
                 item-value="deviceId"
-                label="Select a Camera"
-                style="width: 150px;"
-              ></v-select> -->
-              <v-select
-                v-model="selectedOnvifCamera"
-                :items="onvifCameras"
-                item-title="ip"
-                item-value="ip"
                 label="Select a Camera"
                 style="width: 200px;"
               ></v-select>
@@ -41,7 +33,6 @@
   <script lang="ts">
   import { defineComponent, onMounted, ref, onUnmounted } from 'vue';
   import { WebRTCClient } from "@/service/signaling";
-  import { FlaskClient } from '@/service/flask';
   import { nextTick } from 'vue';
   
   export default defineComponent({
@@ -54,26 +45,6 @@
       const sharedCamera = ref<string>('');
       const isCameraSharing = ref(false);
       let cameraListInterval: number | null = null; // Store the interval ID
-      const flaskClient = ref<FlaskClient | null>(null);
-      const onvifCameras = ref<Array<{ ip: string;}>>([]);
-      const selectedOnvifCamera = ref<string>('');
-      const sharedOnvifCamera = ref<string>('');
-      const isOnvifCameraSharing = ref(false);
-      let onvifCameraListInterval: number | null = null;
-
-      const getOnvifCameraList = async () => {
-        try {
-          if (flaskClient.value) {
-            // Fetch the list of devices
-            const response = await flaskClient.value.getOnvifCameraList();
-
-            // Update the `onvifCameras` state
-            onvifCameras.value = response.devices.map((ip: string) => ({ ip }));
-          }
-        } catch (error) {
-          console.error('Failed to fetch ONVIF cameras:', error);
-        }
-      };
   
       const getCameraList = () => {
         webrtcClient.value?.requestCameraList();
@@ -119,7 +90,6 @@
         }
   
         webrtcClient.value = new WebRTCClient('ws://localhost:8080', 'camera');
-        flaskClient.value = new FlaskClient('http://127.0.0.1:5000');
   
         // Set the callback for camera stream
         webrtcClient.value.onRemoteStream = ((stream: MediaStream) => {
@@ -144,16 +114,12 @@
   
         // Start fetching the camera list every 5 seconds
         cameraListInterval = setInterval(getCameraList, 5000);
-        onvifCameraListInterval = setInterval(getOnvifCameraList, 5000);
       });
   
       // Clear the interval when the component is unmounted
       onUnmounted(() => {
         if (cameraListInterval) {
           clearInterval(cameraListInterval);
-        }
-        if (onvifCameraListInterval) {
-          clearInterval(onvifCameraListInterval);
         }
       });
   
@@ -162,16 +128,11 @@
         startCamera,
         stopCamera,
         toggleCamera,
-        getOnvifCameraList,
-        videoElement,
         cameras,
         selectedCamera,
+        videoElement,
         isCameraSharing,
         sharedCamera,
-        onvifCameras,
-        selectedOnvifCamera,
-        isOnvifCameraSharing,
-        sharedOnvifCamera,
       };
     },
   });
