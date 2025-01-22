@@ -30,5 +30,31 @@ export class FlaskClient {
         return data;
       }
       
+      async getOnvifCameraData(ip: string, username: string, password: string): Promise<any> {
+        try {
+          // Send a request to your Flask backend to fetch ONVIF camera data
+          const response = await fetch(`${this.baseUrl}/api/onvif-camera-data`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              ip,
+              username,
+              password,
+            }),
+          });
+    
+          if (!response.ok) {
+            throw new Error('Failed to fetch ONVIF camera data');
+          }
+    
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          console.error('Error fetching ONVIF camera data:', error);
+          throw error;
+        }
+      }
   }
   
