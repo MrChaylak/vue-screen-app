@@ -83,5 +83,62 @@ export class FlaskClient {
           throw error;
         }
       }
+
+      async ptzMove(ip: string, username: string, password: string, profileToken: string, panSpeed: number, tiltSpeed: number, zoomSpeed: number): Promise<{ message: string }> {
+        try {
+            const response = await fetch(`${this.baseUrl}/api/ptz-move`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ip,
+                    username,
+                    password,
+                    profileToken,
+                    panSpeed,
+                    tiltSpeed,
+                    zoomSpeed,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to perform PTZ movement');
+            }
+
+            const data = await response.json();
+            return data; // Ensure the response contains a success message
+        } catch (error) {
+            console.error('Error performing PTZ movement:', error);
+            throw error;
+        }
+    }
+
+    async ptzStop(ip: string, username: string, password: string, profileToken: string): Promise<{ message: string }> {
+        try {
+            const response = await fetch(`${this.baseUrl}/api/ptz-stop`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ip,
+                    username,
+                    password,
+                    profileToken,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to stop PTZ movement');
+            }
+
+            const data = await response.json();
+            return data; // Ensure the response contains a success message
+        } catch (error) {
+            console.error('Error stopping PTZ movement:', error);
+            throw error;
+        }
+    }
   }
   

@@ -123,62 +123,143 @@
             </v-card>
           </v-col>
           <v-col cols="4">
-  <v-card class="mt-4">
-    <v-card-title>PTZ Controls</v-card-title>
-    <v-card-text>
-      <v-container class="ptz-controls">
-        <!-- Grid Container -->
-        <div class="ptz-grid">
-          <!-- Top Left Button -->
-          <v-btn icon class="ptz-button">
-            <v-icon>mdi-arrow-top-left</v-icon>
-          </v-btn>
+            <!-- PTZ Controls -->
+<v-card class="mt-4" v-if="cameraData.ptz_available">
+  <v-card-title>PTZ Controls</v-card-title>
+  <v-card-text>
+    <v-container class="ptz-controls">
+      <!-- Grid Container -->
+      <div class="ptz-grid">
+        <!-- Top Left Button -->
+        <v-btn
+          icon
+          class="ptz-button"
+          @mousedown="startContinuousMove(-1, 1)"
+          @mouseup="stopContinuousMove"
+          @mouseleave="stopContinuousMove"
+        >
+          <v-icon>mdi-arrow-top-left</v-icon>
+        </v-btn>
 
-          <!-- Top Button -->
-          <v-btn icon class="ptz-button">
-            <v-icon>mdi-arrow-up</v-icon>
-          </v-btn>
+        <!-- Top Button -->
+        <v-btn
+          icon
+          class="ptz-button"
+          @mousedown="startContinuousMove(0, 1)"
+          @mouseup="stopContinuousMove"
+          @mouseleave="stopContinuousMove"
+        >
+          <v-icon>mdi-arrow-up</v-icon>
+        </v-btn>
 
-          <!-- Top Right Button -->
-          <v-btn icon class="ptz-button">
-            <v-icon>mdi-arrow-top-right</v-icon>
-          </v-btn>
+        <!-- Top Right Button -->
+        <v-btn
+          icon
+          class="ptz-button"
+          @mousedown="startContinuousMove(1, 1)"
+          @mouseup="stopContinuousMove"
+          @mouseleave="stopContinuousMove"
+        >
+          <v-icon>mdi-arrow-top-right</v-icon>
+        </v-btn>
 
-          <!-- Left Button -->
-          <v-btn icon class="ptz-button">
-            <v-icon>mdi-arrow-left</v-icon>
-          </v-btn>
+        <!-- Left Button -->
+        <v-btn
+          icon
+          class="ptz-button"
+          @mousedown="startContinuousMove(-1, 0)"
+          @mouseup="stopContinuousMove"
+          @mouseleave="stopContinuousMove"
+        >
+          <v-icon>mdi-arrow-left</v-icon>
+        </v-btn>
 
-          <!-- Center Button -->
-          <v-btn icon class="ptz-button center-button">
-            <v-icon>mdi-circle</v-icon>
-          </v-btn>
+        <!-- Center Button -->
+        <v-btn
+          icon
+          class="ptz-button center-button"
+          @click="ptzStop"
+        >
+          <v-icon>mdi-circle</v-icon>
+        </v-btn>
 
-          <!-- Right Button -->
-          <v-btn icon class="ptz-button">
-            <v-icon>mdi-arrow-right</v-icon>
-          </v-btn>
+        <!-- Right Button -->
+        <v-btn
+          icon
+          class="ptz-button"
+          @mousedown="startContinuousMove(1, 0)"
+          @mouseup="stopContinuousMove"
+          @mouseleave="stopContinuousMove"
+        >
+          <v-icon>mdi-arrow-right</v-icon>
+        </v-btn>
 
-          <!-- Bottom Left Button -->
-          <v-btn icon class="ptz-button">
-            <v-icon>mdi-arrow-bottom-left</v-icon>
-          </v-btn>
+        <!-- Bottom Left Button -->
+        <v-btn
+          icon
+          class="ptz-button"
+          @mousedown="startContinuousMove(-1, -1)"
+          @mouseup="stopContinuousMove"
+          @mouseleave="stopContinuousMove"
+        >
+          <v-icon>mdi-arrow-bottom-left</v-icon>
+        </v-btn>
 
-          <!-- Bottom Button -->
-          <v-btn icon class="ptz-button">
-            <v-icon>mdi-arrow-down</v-icon>
-          </v-btn>
+        <!-- Bottom Button -->
+        <v-btn
+          icon
+          class="ptz-button"
+          @mousedown="startContinuousMove(0, -1)"
+          @mouseup="stopContinuousMove"
+          @mouseleave="stopContinuousMove"
+        >
+          <v-icon>mdi-arrow-down</v-icon>
+        </v-btn>
 
-          <!-- Bottom Right Button -->
-          <v-btn icon class="ptz-button">
-            <v-icon>mdi-arrow-bottom-right</v-icon>
-          </v-btn>
-        </div>
-      </v-container>
-    </v-card-text>
-  </v-card>
+        <!-- Bottom Right Button -->
+        <v-btn
+          icon
+          class="ptz-button"
+          @mousedown="startContinuousMove(1, -1)"
+          @mouseup="stopContinuousMove"
+          @mouseleave="stopContinuousMove"
+        >
+          <v-icon>mdi-arrow-bottom-right</v-icon>
+        </v-btn>
+      </div>
+
+      <!-- Speed Control -->
+
+      <v-row class="mt-4" align="center">
+
+<v-col cols="auto">
+
+  <span class="text-body-1">Speed (1-8):</span>
+
 </v-col>
+
+<v-col cols="auto">
+
+  <v-select
+
+    v-model="ptzSpeed"
+
+    :items="[1, 2, 3, 4, 5, 6, 7, 8]"
+
+    density="compact"
+
+    style="width: 100px;"
+
+  ></v-select>
+
+</v-col>
+
 </v-row>
+    </v-container>
+  </v-card-text>
+</v-card>
+          </v-col>
+        </v-row>
       </v-container>
     </v-card-text>
   </v-card>
@@ -195,23 +276,20 @@ export default defineComponent({
     const flaskClient = ref<FlaskClient | null>(null);
     const onvifCameras = ref<Array<{ ip: string; }>>([]);
     const selectedOnvifCamera = ref<string>('');
-    const sharedOnvifCamera = ref<string>('');
-    const isOnvifCameraSharing = ref(false);
-    let onvifCameraListInterval: number | null = null;
     const username = ref<string>('');
     const password = ref<string>('');
     const cameraData = ref<any>(null);
     const errorMessage = ref<string>('');
     const selectedProfileToken = ref<string>('');
+    let onvifCameraListInterval: number | null = null;
     const streamUri = ref<string>('');
+    const isMoving = ref(false);
+    const ptzSpeed = ref(5); // Default speed is 5
 
     const getOnvifCameraList = async () => {
       try {
         if (flaskClient.value) {
-          // Fetch the list of devices
           const response = await flaskClient.value.getOnvifCameraList();
-
-          // Update the `onvifCameras` state
           onvifCameras.value = response.devices.map((ip: string) => ({ ip }));
         }
       } catch (error) {
@@ -228,14 +306,11 @@ export default defineComponent({
             password.value
           );
           cameraData.value = data;
-          errorMessage.value = ''; // Clear any previous error message
+          errorMessage.value = '';
 
-          // Pre-select the first profile by default
           if (data.profiles.length > 0) {
             selectedProfileToken.value = data.profiles[0].token;
           }
-        } else {
-          console.error('FlaskClient is not initialized.');
         }
       } catch (error: any) {
         if (error.response && error.response.status === 401) {
@@ -273,11 +348,95 @@ export default defineComponent({
   }
 };
 
+    // Start continuous movement
+    const startContinuousMove = async (panSpeed: number, tiltSpeed: number) => {
+      isMoving.value = true;
+      const adjustedPanSpeed = panSpeed * (ptzSpeed.value / 8);
+      const adjustedTiltSpeed = tiltSpeed * (ptzSpeed.value / 8);
+      try {
+        if (flaskClient.value && selectedProfileToken.value) {
+          await flaskClient.value.ptzMove(
+            selectedOnvifCamera.value,
+            username.value,
+            password.value,
+            selectedProfileToken.value,
+            adjustedPanSpeed,
+            adjustedTiltSpeed,
+            0 // Zoom speed (0 for no zoom)
+          );
+        }
+      } catch (error) {
+        console.error('Failed to perform PTZ movement:', error);
+      }
+    };
+
+    // Stop continuous movement
+    const stopContinuousMove = async () => {
+      if (isMoving.value) {
+        isMoving.value = false;
+        try {
+          if (flaskClient.value && selectedProfileToken.value) {
+            await flaskClient.value.ptzStop(
+              selectedOnvifCamera.value,
+              username.value,
+              password.value,
+              selectedProfileToken.value
+            );
+          }
+        } catch (error) {
+          console.error('Failed to stop PTZ movement:', error);
+        }
+      }
+    };
+
+    // Fixed movement on click
+    const ptzMove = async (panSpeed: number, tiltSpeed: number) => {
+      try {
+        if (flaskClient.value && selectedProfileToken.value) {
+          await flaskClient.value.ptzMove(
+            selectedOnvifCamera.value,
+            username.value,
+            password.value,
+            selectedProfileToken.value,
+            panSpeed,
+            tiltSpeed,
+            0 // Zoom speed (0 for no zoom)
+          );
+
+          // Stop after a short delay (e.g., 200ms)
+          setTimeout(() => {
+            flaskClient.value?.ptzStop(
+              selectedOnvifCamera.value,
+              username.value,
+              password.value,
+              selectedProfileToken.value
+            );
+          }, 200);
+        }
+      } catch (error) {
+        console.error('Failed to perform PTZ movement:', error);
+      }
+    };
+
+    const ptzStop = async () => {
+      try {
+        if (flaskClient.value && selectedProfileToken.value) {
+          await flaskClient.value.ptzStop(
+            selectedOnvifCamera.value,
+            username.value,
+            password.value,
+            selectedProfileToken.value
+          );
+        }
+      } catch (error) {
+        console.error('Failed to stop PTZ movement:', error);
+      }
+    };
 
     onMounted(() => {
       flaskClient.value = new FlaskClient('http://127.0.0.1:5000');
-
       getOnvifCameraList();
+
       onvifCameraListInterval = setInterval(getOnvifCameraList, 60000);
     });
 
@@ -286,22 +445,25 @@ export default defineComponent({
       if (onvifCameraListInterval) {
         clearInterval(onvifCameraListInterval);
       }
+
     });
 
     return {
       getOnvifCameraList,
       getOnvifCameraData,
       selectProfile,
+      startContinuousMove,
+      stopContinuousMove,
+      ptzMove,
+      ptzStop,
       onvifCameras,
       selectedOnvifCamera,
-      isOnvifCameraSharing,
-      sharedOnvifCamera,
       username,
       password,
       cameraData,
       errorMessage,
       selectedProfileToken,
-      onvifCameraListInterval,
+      ptzSpeed,
     };
   },
 });
@@ -310,17 +472,17 @@ export default defineComponent({
 <style>
 .ptz-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 equal columns */
-  grid-template-rows: repeat(3, 1fr); /* 3 equal rows */
-  gap: 8px; /* Space between buttons */
-  width: 200px; /* Fixed width for the grid */
-  height: 200px; /* Fixed height for the grid */
-  margin: 0 auto; /* Center the grid */
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 8px;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
 }
 
 .ptz-button {
-  width: 100%; /* Make buttons fill the grid cell */
-  height: 100%; /* Make buttons fill the grid cell */
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
