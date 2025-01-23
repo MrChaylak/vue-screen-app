@@ -134,7 +134,7 @@
         <v-btn
           icon
           class="ptz-button"
-          @mousedown="startContinuousMove(-0.5, 0.5)"
+          @mousedown="startContinuousMove(-1, 1)"
           @mouseup="stopContinuousMove"
           @mouseleave="stopContinuousMove"
         >
@@ -145,7 +145,7 @@
         <v-btn
           icon
           class="ptz-button"
-          @mousedown="startContinuousMove(0, 0.5)"
+          @mousedown="startContinuousMove(0, 1)"
           @mouseup="stopContinuousMove"
           @mouseleave="stopContinuousMove"
         >
@@ -156,7 +156,7 @@
         <v-btn
           icon
           class="ptz-button"
-          @mousedown="startContinuousMove(0.5, 0.5)"
+          @mousedown="startContinuousMove(1, 1)"
           @mouseup="stopContinuousMove"
           @mouseleave="stopContinuousMove"
         >
@@ -167,7 +167,7 @@
         <v-btn
           icon
           class="ptz-button"
-          @mousedown="startContinuousMove(-0.5, 0)"
+          @mousedown="startContinuousMove(-1, 0)"
           @mouseup="stopContinuousMove"
           @mouseleave="stopContinuousMove"
         >
@@ -187,7 +187,7 @@
         <v-btn
           icon
           class="ptz-button"
-          @mousedown="startContinuousMove(0.5, 0)"
+          @mousedown="startContinuousMove(1, 0)"
           @mouseup="stopContinuousMove"
           @mouseleave="stopContinuousMove"
         >
@@ -198,7 +198,7 @@
         <v-btn
           icon
           class="ptz-button"
-          @mousedown="startContinuousMove(-0.5, -0.5)"
+          @mousedown="startContinuousMove(-1, -1)"
           @mouseup="stopContinuousMove"
           @mouseleave="stopContinuousMove"
         >
@@ -209,7 +209,7 @@
         <v-btn
           icon
           class="ptz-button"
-          @mousedown="startContinuousMove(0, -0.5)"
+          @mousedown="startContinuousMove(0, -1)"
           @mouseup="stopContinuousMove"
           @mouseleave="stopContinuousMove"
         >
@@ -220,13 +220,41 @@
         <v-btn
           icon
           class="ptz-button"
-          @mousedown="startContinuousMove(0.5, -0.5)"
+          @mousedown="startContinuousMove(1, -1)"
           @mouseup="stopContinuousMove"
           @mouseleave="stopContinuousMove"
         >
           <v-icon>mdi-arrow-bottom-right</v-icon>
         </v-btn>
       </div>
+
+      <!-- Speed Control -->
+
+      <v-row class="mt-4" align="center">
+
+<v-col cols="auto">
+
+  <span class="text-body-1">Speed (1-8):</span>
+
+</v-col>
+
+<v-col cols="auto">
+
+  <v-select
+
+    v-model="ptzSpeed"
+
+    :items="[1, 2, 3, 4, 5, 6, 7, 8]"
+
+    density="compact"
+
+    style="width: 100px;"
+
+  ></v-select>
+
+</v-col>
+
+</v-row>
     </v-container>
   </v-card-text>
 </v-card>
@@ -256,6 +284,7 @@ export default defineComponent({
     let onvifCameraListInterval: number | null = null;
     const streamUri = ref<string>('');
     const isMoving = ref(false);
+    const ptzSpeed = ref(5); // Default speed is 5
 
     const getOnvifCameraList = async () => {
       try {
@@ -322,6 +351,8 @@ export default defineComponent({
     // Start continuous movement
     const startContinuousMove = async (panSpeed: number, tiltSpeed: number) => {
       isMoving.value = true;
+      const adjustedPanSpeed = panSpeed * (ptzSpeed.value / 8);
+      const adjustedTiltSpeed = tiltSpeed * (ptzSpeed.value / 8);
       try {
         if (flaskClient.value && selectedProfileToken.value) {
           await flaskClient.value.ptzMove(
@@ -329,8 +360,8 @@ export default defineComponent({
             username.value,
             password.value,
             selectedProfileToken.value,
-            panSpeed,
-            tiltSpeed,
+            adjustedPanSpeed,
+            adjustedTiltSpeed,
             0 // Zoom speed (0 for no zoom)
           );
         }
@@ -432,6 +463,7 @@ export default defineComponent({
       cameraData,
       errorMessage,
       selectedProfileToken,
+      ptzSpeed,
     };
   },
 });
