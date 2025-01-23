@@ -33,6 +33,15 @@
               <v-btn @click="getOnvifCameraData" color="primary">Get Data</v-btn>
             </v-col>
           </v-row>
+
+          <!-- Error Message -->
+        <v-row v-if="errorMessage">
+          <v-col>
+            <v-alert type="error" dismissible @input="errorMessage = ''">
+              {{ errorMessage }}
+            </v-alert>
+          </v-col>
+        </v-row>
   
           <!-- Display ONVIF Camera Data -->
           <v-row v-if="cameraData">
@@ -132,6 +141,7 @@
         const username = ref<string>('');
         const password = ref<string>('');
         const cameraData = ref<any>(null);
+        const errorMessage = ref<string>('');
 
       const getOnvifCameraList = async () => {
         try {
@@ -156,12 +166,17 @@
             password.value
           );
           cameraData.value = data;
-          console.log('ONVIF Camera Data:', data);
+          errorMessage.value = ''; // Clear any previous error message
         } else {
           console.error('FlaskClient is not initialized.');
         }
-      } catch (error) {
-        console.error('Failed to fetch ONVIF camera data:', error);
+      } catch (error: any) {
+        if (error.response && error.response.status === 401) {
+          errorMessage.value = 'Incorrect username or password';
+        } else {
+          errorMessage.value = 'Failed to fetch ONVIF camera data';
+        }
+        console.error('Error:', error);
       }
     };
 
@@ -171,7 +186,8 @@
       onMounted(() => {
         flaskClient.value = new FlaskClient('http://127.0.0.1:5000');
 
-        onvifCameraListInterval = setInterval(getOnvifCameraList, 5000);
+        getOnvifCameraList();
+        onvifCameraListInterval = setInterval(getOnvifCameraList, 60000);
       });
   
       // Clear the interval when the component is unmounted
@@ -191,6 +207,7 @@
         username,
         password,
         cameraData,
+        errorMessage,
       };
     },
   });
