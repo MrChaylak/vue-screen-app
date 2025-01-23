@@ -58,26 +58,54 @@
                       <v-list-item-title>Serial Number</v-list-item-title>
                       <v-list-item-subtitle>{{ cameraData.device_info.serial_number }}</v-list-item-subtitle>
                     </v-list-item>
+                    <v-list-item>
+                      <v-list-item-title>Hardware ID</v-list-item-title>
+                      <v-list-item-subtitle>{{ cameraData.device_info.hardware_id }}</v-list-item-subtitle>
+                    </v-list-item>
+                    <v-list-item>
+                      <v-list-item-title>PTZ Available</v-list-item-title>
+                      <v-list-item-subtitle>{{ cameraData.ptz_available }}</v-list-item-subtitle>
+                    </v-list-item>
+                    <v-list-item>
+                      <v-list-item-title>Camera Running</v-list-item-title>
+                      <v-list-item-subtitle>{{ cameraData.camera_running }}</v-list-item-subtitle>
+                    </v-list-item>
                   </v-list>
   
                   <!-- Media Profiles -->
-                  <v-expansion-panels class="mt-4">
-                    <v-expansion-panel v-for="(profile, index) in cameraData.profiles" :key="index">
-                      <v-expansion-panel-title>Profile {{ index + 1 }}</v-expansion-panel-title>
-                      <v-expansion-panel-text>
-                        <v-list>
-                          <v-list-item>
-                            <v-list-item-title>Name</v-list-item-title>
-                            <v-list-item-subtitle>{{ profile.name }}</v-list-item-subtitle>
-                          </v-list-item>
-                          <v-list-item>
-                            <v-list-item-title>Token</v-list-item-title>
-                            <v-list-item-subtitle>{{ profile.token }}</v-list-item-subtitle>
-                          </v-list-item>
-                        </v-list>
-                      </v-expansion-panel-text>
-                    </v-expansion-panel>
-                  </v-expansion-panels>
+<v-expansion-panels class="mt-4">
+  <v-expansion-panel v-for="(profile, index) in cameraData.profiles" :key="index">
+    <v-expansion-panel-title>Profile {{ index + 1 }}</v-expansion-panel-title>
+    <v-expansion-panel-text>
+      <v-list>
+        <v-list-item>
+          <v-list-item-title>Name</v-list-item-title>
+          <v-list-item-subtitle>{{ profile.name }}</v-list-item-subtitle>
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-title>Token</v-list-item-title>
+          <v-list-item-subtitle>{{ profile.token }}</v-list-item-subtitle>
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-title>Encoder</v-list-item-title>
+          <v-list-item-subtitle>{{ profile.encoder }}</v-list-item-subtitle>
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-title>Resolution</v-list-item-title>
+          <v-list-item-subtitle>{{ profile.resolution }}</v-list-item-subtitle>
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-title>Frame Rate</v-list-item-title>
+          <v-list-item-subtitle>{{ profile.frame_rate }} fps</v-list-item-subtitle>
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-title>Bitrate</v-list-item-title>
+          <v-list-item-subtitle>{{ profile.bitrate }} kbps</v-list-item-subtitle>
+        </v-list-item>
+      </v-list>
+    </v-expansion-panel-text>
+  </v-expansion-panel>
+</v-expansion-panels>
                 </v-card-text>
               </v-card>
             </v-col>
