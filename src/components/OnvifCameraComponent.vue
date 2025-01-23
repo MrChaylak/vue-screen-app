@@ -30,7 +30,7 @@
 
         <!-- Display ONVIF Camera Data -->
         <v-row v-if="cameraData">
-          <v-col>
+          <v-col cols="8">
             <v-card class="mt-4">
               <v-card-title>ONVIF Camera Data</v-card-title>
               <v-card-text>
@@ -122,7 +122,63 @@
               </v-card-text>
             </v-card>
           </v-col>
-        </v-row>
+          <v-col cols="4">
+  <v-card class="mt-4">
+    <v-card-title>PTZ Controls</v-card-title>
+    <v-card-text>
+      <v-container class="ptz-controls">
+        <!-- Grid Container -->
+        <div class="ptz-grid">
+          <!-- Top Left Button -->
+          <v-btn icon class="ptz-button">
+            <v-icon>mdi-arrow-top-left</v-icon>
+          </v-btn>
+
+          <!-- Top Button -->
+          <v-btn icon class="ptz-button">
+            <v-icon>mdi-arrow-up</v-icon>
+          </v-btn>
+
+          <!-- Top Right Button -->
+          <v-btn icon class="ptz-button">
+            <v-icon>mdi-arrow-top-right</v-icon>
+          </v-btn>
+
+          <!-- Left Button -->
+          <v-btn icon class="ptz-button">
+            <v-icon>mdi-arrow-left</v-icon>
+          </v-btn>
+
+          <!-- Center Button -->
+          <v-btn icon class="ptz-button center-button">
+            <v-icon>mdi-circle</v-icon>
+          </v-btn>
+
+          <!-- Right Button -->
+          <v-btn icon class="ptz-button">
+            <v-icon>mdi-arrow-right</v-icon>
+          </v-btn>
+
+          <!-- Bottom Left Button -->
+          <v-btn icon class="ptz-button">
+            <v-icon>mdi-arrow-bottom-left</v-icon>
+          </v-btn>
+
+          <!-- Bottom Button -->
+          <v-btn icon class="ptz-button">
+            <v-icon>mdi-arrow-down</v-icon>
+          </v-btn>
+
+          <!-- Bottom Right Button -->
+          <v-btn icon class="ptz-button">
+            <v-icon>mdi-arrow-bottom-right</v-icon>
+          </v-btn>
+        </div>
+      </v-container>
+    </v-card-text>
+  </v-card>
+</v-col>
+</v-row>
       </v-container>
     </v-card-text>
   </v-card>
@@ -251,4 +307,27 @@ export default defineComponent({
 });
 </script>
 
-<style></style>
+<style>
+.ptz-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 equal columns */
+  grid-template-rows: repeat(3, 1fr); /* 3 equal rows */
+  gap: 8px; /* Space between buttons */
+  width: 200px; /* Fixed width for the grid */
+  height: 200px; /* Fixed height for the grid */
+  margin: 0 auto; /* Center the grid */
+}
+
+.ptz-button {
+  width: 100%; /* Make buttons fill the grid cell */
+  height: 100%; /* Make buttons fill the grid cell */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.center-button {
+  width: 100%;
+  height: 100%;
+}
+</style>
