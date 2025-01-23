@@ -56,5 +56,32 @@ export class FlaskClient {
           throw error;
         }
       }
+
+      async setOnvifCameraProfile(ip: string, username: string, password: string, profileToken: string): Promise<{ stream_uri: string }> {
+        try {
+          const response = await fetch(`${this.baseUrl}/api/set-onvif-camera-profile`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              ip,
+              username,
+              password,
+              profileToken,
+            }),
+          });
+      
+          if (!response.ok) {
+            throw new Error('Failed to set ONVIF camera profile');
+          }
+      
+          const data = await response.json();
+          return data; // Ensure the response contains `stream_uri`
+        } catch (error) {
+          console.error('Error setting ONVIF camera profile:', error);
+          throw error;
+        }
+      }
   }
   
