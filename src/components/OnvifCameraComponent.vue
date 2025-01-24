@@ -134,7 +134,7 @@
         <v-btn
           icon
           class="ptz-button"
-          @mousedown="startContinuousMove(-1, 1)"
+          @mousedown="startContinuousMove(-1, 1, 0)"
           @mouseup="stopContinuousMove"
           @mouseleave="stopContinuousMove"
         >
@@ -145,7 +145,7 @@
         <v-btn
           icon
           class="ptz-button"
-          @mousedown="startContinuousMove(0, 1)"
+          @mousedown="startContinuousMove(0, 1, 0)"
           @mouseup="stopContinuousMove"
           @mouseleave="stopContinuousMove"
         >
@@ -156,7 +156,7 @@
         <v-btn
           icon
           class="ptz-button"
-          @mousedown="startContinuousMove(1, 1)"
+          @mousedown="startContinuousMove(1, 1, 0)"
           @mouseup="stopContinuousMove"
           @mouseleave="stopContinuousMove"
         >
@@ -167,7 +167,7 @@
         <v-btn
           icon
           class="ptz-button"
-          @mousedown="startContinuousMove(-1, 0)"
+          @mousedown="startContinuousMove(-1, 0, 0)"
           @mouseup="stopContinuousMove"
           @mouseleave="stopContinuousMove"
         >
@@ -187,7 +187,7 @@
         <v-btn
           icon
           class="ptz-button"
-          @mousedown="startContinuousMove(1, 0)"
+          @mousedown="startContinuousMove(1, 0, 0)"
           @mouseup="stopContinuousMove"
           @mouseleave="stopContinuousMove"
         >
@@ -198,7 +198,7 @@
         <v-btn
           icon
           class="ptz-button"
-          @mousedown="startContinuousMove(-1, -1)"
+          @mousedown="startContinuousMove(-1, -1, 0)"
           @mouseup="stopContinuousMove"
           @mouseleave="stopContinuousMove"
         >
@@ -209,7 +209,7 @@
         <v-btn
           icon
           class="ptz-button"
-          @mousedown="startContinuousMove(0, -1)"
+          @mousedown="startContinuousMove(0, -1, 0)"
           @mouseup="stopContinuousMove"
           @mouseleave="stopContinuousMove"
         >
@@ -220,7 +220,7 @@
         <v-btn
           icon
           class="ptz-button"
-          @mousedown="startContinuousMove(1, -1)"
+          @mousedown="startContinuousMove(1, -1, 0)"
           @mouseup="stopContinuousMove"
           @mouseleave="stopContinuousMove"
         >
@@ -238,7 +238,7 @@
 
 </v-col>
 
-<v-col cols="auto">
+<v-col cols="auto" class="pa-0">
 
   <v-select
 
@@ -248,13 +248,42 @@
 
     density="compact"
 
-    style="width: 100px;"
+    style="width: 72px;"
 
   ></v-select>
 
 </v-col>
 
 </v-row>
+
+<!-- Zoom Control -->
+<v-row class="mt-4" align="center" justify="center">
+        <v-col cols="auto" class="pa-0">
+          <v-btn
+            icon
+            class="zoom-button"
+            @mousedown="startContinuousMove(0, 0, -1)"
+            @mouseup="ptzStop"
+            @mouseleave="ptzStop"
+          >
+            <v-icon>mdi-minus</v-icon>
+          </v-btn>
+        </v-col>
+        <v-col cols="auto">
+          <span class="text-body-1">Zoom</span>
+        </v-col>
+        <v-col cols="auto" class="pa-0">
+          <v-btn
+            icon
+            class="zoom-button"
+            @mousedown="startContinuousMove(0, 0, 1)"
+            @mouseup="ptzStop"
+            @mouseleave="ptzStop"
+          >
+            <v-icon>mdi-plus</v-icon>
+          </v-btn>
+        </v-col>
+      </v-row>
     </v-container>
   </v-card-text>
 </v-card>
@@ -349,10 +378,11 @@ export default defineComponent({
 };
 
     // Start continuous movement
-    const startContinuousMove = async (panSpeed: number, tiltSpeed: number) => {
+    const startContinuousMove = async (panSpeed: number, tiltSpeed: number, zoomSpeed: number) => {
       isMoving.value = true;
       const adjustedPanSpeed = panSpeed * (ptzSpeed.value / 8);
       const adjustedTiltSpeed = tiltSpeed * (ptzSpeed.value / 8);
+      const adjustedZoomSpeed = zoomSpeed;
       try {
         if (flaskClient.value && selectedProfileToken.value) {
           await flaskClient.value.ptzMove(
@@ -362,7 +392,7 @@ export default defineComponent({
             selectedProfileToken.value,
             adjustedPanSpeed,
             adjustedTiltSpeed,
-            0 // Zoom speed (0 for no zoom)
+            adjustedZoomSpeed,
           );
         }
       } catch (error) {
