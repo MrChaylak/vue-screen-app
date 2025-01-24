@@ -140,5 +140,60 @@ export class FlaskClient {
             throw error;
         }
     }
+
+    async moveFocusContinuous(ip: string, username: string, password: string, profileToken: string, speed: number): Promise<{ message: string }> {
+      try {
+          const response = await fetch(`${this.baseUrl}/api/move-focus-continuous`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                  ip,
+                  username,
+                  password,
+                  profileToken,
+                  speed,
+              }),
+          });
+
+          if (!response.ok) {
+              throw new Error('Failed to start continuous focus adjustment');
+          }
+
+          const data = await response.json();
+          return data; // Ensure the response contains a success message
+      } catch (error) {
+          console.error('Error starting continuous focus adjustment:', error);
+          throw error;
+      }
   }
+
+  async stopFocus(ip: string, username: string, password: string, profileToken: string): Promise<{ message: string }> {
+      try {
+          const response = await fetch(`${this.baseUrl}/api/stop-focus`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                  ip,
+                  username,
+                  password,
+                  profileToken,
+              }),
+          });
+
+          if (!response.ok) {
+              throw new Error('Failed to stop focus adjustment');
+          }
+
+          const data = await response.json();
+          return data; // Ensure the response contains a success message
+      } catch (error) {
+          console.error('Error stopping focus adjustment:', error);
+          throw error;
+      }
+  }
+}
   

@@ -218,8 +218,8 @@
                   <!-- Focus Control -->
                   <v-row class="mt-4" align="center" justify="center">
                     <v-col cols="auto" class="pa-0">
-                      <v-btn icon class="zoom-button" @mousedown="startContinuousMove(0, 0, -1)" @mouseup="ptzStop"
-                        @mouseleave="ptzStop">
+                      <v-btn icon class="zoom-button" @mousedown="startFocusContinuous(-0.5)" @mouseup="stopFocus"
+                        @mouseleave="stopFocus">
                         <v-icon>mdi-minus</v-icon>
                       </v-btn>
                     </v-col>
@@ -227,8 +227,8 @@
                       <span class="text-body-1">Focus</span>
                     </v-col>
                     <v-col cols="auto" class="pa-0">
-                      <v-btn icon class="zoom-button" @mousedown="startContinuousMove(0, 0, 1)" @mouseup="ptzStop"
-                        @mouseleave="ptzStop">
+                      <v-btn icon class="zoom-button" @mousedown="startFocusContinuous(0.5)" @mouseup="stopFocus"
+                        @mouseleave="stopFocus">
                         <v-icon>mdi-plus</v-icon>
                       </v-btn>
                     </v-col>
@@ -412,6 +412,70 @@ export default defineComponent({
       }
     };
 
+    // Start continuous focus adjustment
+
+    const startFocusContinuous = async (speed: number) => {
+
+try {
+
+  if (flaskClient.value && selectedProfileToken.value) {
+
+    await flaskClient.value.moveFocusContinuous(
+
+      selectedOnvifCamera.value,
+
+      username.value,
+
+      password.value,
+
+      selectedProfileToken.value,
+
+      speed
+
+    );
+
+  }
+
+} catch (error) {
+
+  console.error('Error starting continuous focus:', error);
+
+}
+
+};
+
+
+
+// Stop focus adjustment
+
+const stopFocus = async () => {
+
+try {
+
+  if (flaskClient.value && selectedProfileToken.value) {
+
+    await flaskClient.value.stopFocus(
+
+      selectedOnvifCamera.value,
+
+      username.value,
+
+      password.value,
+
+      selectedProfileToken.value
+
+    );
+
+  }
+
+} catch (error) {
+
+  console.error('Error stopping focus:', error);
+
+}
+
+};
+
     onMounted(() => {
       flaskClient.value = new FlaskClient('http://127.0.0.1:5000');
       getOnvifCameraList();
@@ -435,6 +499,8 @@ export default defineComponent({
       stopContinuousMove,
       ptzMove,
       ptzStop,
+      startFocusContinuous,
+      stopFocus,
       onvifCameras,
       selectedOnvifCamera,
       username,
