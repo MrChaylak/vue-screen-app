@@ -1,14 +1,14 @@
-# Vuetify (Default)
+# Vue Remote Screen and Onvif Camera Control App
 
-This is the official scaffolding tool for Vuetify, designed to give you a head start in building your new Vuetify application. It sets up a base template with all the necessary configurations and standard directory structure, enabling you to begin development without the hassle of setting up the project from scratch.
+With this **Vue** app you can remotely control shared screens, display available camera and control Onvif Devices. The screen-share route uses **WebRTC** and **Electron** to get and display the remote machines available screens and cameras. The onvif-camera route uses **Flask** to discover Onvif cameras on network and display its details. You can also control the cameras PTZ (Pan-Tilt-Zoom) actions if available.
 
-## ❗️ Important Links
+## Used Technologies
 
-- 📄 [Docs](https://vuetifyjs.com/)
-- 🚨 [Issues](https://issues.vuetifyjs.com/)
-- 🏬 [Store](https://store.vuetifyjs.com/)
-- 🎮 [Playground](https://play.vuetifyjs.com/)
-- 💬 [Discord](https://community.vuetifyjs.com)
+- 🟣 [Vuetify](https://vuetifyjs.com/) for styling.
+- 🟢 [Vue](https://vuejs.org/) for frontend framework.
+- 🔵 [Electron](https://www.electronjs.org/) for getting machines screen and camera.
+- 🟡 [WebRTC](https://webrtc.org/) for real-time stream of screen and camera.
+- 🔴 [Flask](https://flask.palletsprojects.com/) for backend api to control onvif cameras
 
 ## 💿 Install
 
