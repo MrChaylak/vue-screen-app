@@ -4,11 +4,13 @@ With this **Vue** app you can remotely control shared screens, display available
 
 ## Table of Contents
 
-- Used Technologies
-- Prerequisites
-- Installation
-- Running the Application
-- License
+- [Used Technologies](#used-technologies)
+- [Prerequisites](#-prerequisites)
+- [Installation](#-installation)
+- [Running the Application](#-running-the-application)
+- [License](#-License)
+
+---
 
 ## Used Technologies
 
