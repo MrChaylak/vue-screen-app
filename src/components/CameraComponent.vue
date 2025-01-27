@@ -31,11 +31,11 @@
   </template>
   
   <script lang="ts">
-  import { defineComponent, onMounted, ref, onUnmounted } from 'vue';
+  import { onMounted, ref, onUnmounted } from 'vue';
   import { WebRTCClient } from "@/service/signaling";
   import { nextTick } from 'vue';
   
-  export default defineComponent({
+  export default {
     name: 'CameraComponent',
     setup() {
       const webrtcClient = ref<WebRTCClient | null>(null);
@@ -135,7 +135,7 @@
         sharedCamera,
       };
     },
-  });
+  };
   </script>
   
   <style>

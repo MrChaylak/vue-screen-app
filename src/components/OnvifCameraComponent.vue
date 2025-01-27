@@ -244,11 +244,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref, onUnmounted } from 'vue';
+import { onMounted, ref, onUnmounted } from 'vue';
 import { FlaskClient } from '@/service/flask';
 import { nextTick } from 'vue';
 
-export default defineComponent({
+export default {
   name: 'OnvifCameraComponent',
   setup() {
     const flaskClient = ref<FlaskClient | null>(null);
@@ -291,12 +291,8 @@ export default defineComponent({
           }
         }
       } catch (error: any) {
-        if (error.response && error.response.status === 401) {
-          errorMessage.value = 'Incorrect username or password';
-        } else {
-          errorMessage.value = 'Failed to fetch ONVIF camera data';
-        }
-        console.error('Error:', error);
+        errorMessage.value = error;
+        // console.error(error);
       }
     };
 
@@ -511,7 +507,7 @@ try {
       ptzSpeed,
     };
   },
-});
+};
 </script>
 
 <style>
