@@ -6,16 +6,16 @@
         <v-row align="center">
           <v-col cols="auto">
             <v-select v-model="selectedOnvifCamera" :items="onvifCameras" item-title="ip" item-value="ip"
-              label="Select a Camera" style="width: 200px;"></v-select>
+              label="Select a Camera" style="width: 15vw;"></v-select>
           </v-col>
           <v-col cols="auto">
-            <v-text-field v-model="username" label="Username" style="width: 200px;"></v-text-field>
+            <v-text-field v-model="username" label="Username" style="width: 15vw;"></v-text-field>
           </v-col>
           <v-col cols="auto">
-            <v-text-field v-model="password" label="Password" type="password" style="width: 200px;"></v-text-field>
+            <v-text-field v-model="password" label="Password" type="password" style="width: 15vw;"></v-text-field>
           </v-col>
           <v-col cols="auto">
-            <v-btn @click="getOnvifCameraData" color="primary">Get Data</v-btn>
+            <v-btn @click="getOnvifCameraData" color="primary" style="height: 7vh;">Get Data</v-btn>
           </v-col>
         </v-row>
 
@@ -34,40 +34,27 @@
             <v-card class="mt-4">
               <v-card-title>ONVIF Camera Data</v-card-title>
               <v-card-text>
+
                 <!-- Device Information -->
                 <v-list>
-                  <v-list-item>
-                    <v-list-item-title>Manufacturer</v-list-item-title>
-                    <v-list-item-subtitle>{{ cameraData.device_info.manufacturer }}</v-list-item-subtitle>
-                  </v-list-item>
-                  <v-list-item>
-                    <v-list-item-title>Model</v-list-item-title>
-                    <v-list-item-subtitle>{{ cameraData.device_info.model }}</v-list-item-subtitle>
-                  </v-list-item>
-                  <v-list-item>
-                    <v-list-item-title>Firmware Version</v-list-item-title>
-                    <v-list-item-subtitle>{{ cameraData.device_info.firmware_version }}</v-list-item-subtitle>
-                  </v-list-item>
-                  <v-list-item>
-                    <v-list-item-title>Serial Number</v-list-item-title>
-                    <v-list-item-subtitle>{{ cameraData.device_info.serial_number }}</v-list-item-subtitle>
-                  </v-list-item>
-                  <v-list-item>
-                    <v-list-item-title>Hardware ID</v-list-item-title>
-                    <v-list-item-subtitle>{{ cameraData.device_info.hardware_id }}</v-list-item-subtitle>
-                  </v-list-item>
-                  <v-list-item>
-                    <v-list-item-title>PTZ Available</v-list-item-title>
-                    <v-list-item-subtitle>{{ cameraData.ptz_available }}</v-list-item-subtitle>
-                  </v-list-item>
-                  <v-list-item>
-                    <v-list-item-title>Camera Running</v-list-item-title>
-                    <v-list-item-subtitle>{{ cameraData.camera_running }}</v-list-item-subtitle>
-                  </v-list-item>
-                  <v-list-item>
-                    <v-list-item-title>System Date and Time</v-list-item-title>
-                    <v-list-item-subtitle>{{ cameraData.system_date_time }}</v-list-item-subtitle>
-                  </v-list-item>
+                  <!-- Custom order for device_info -->
+                  <template v-for="key in ['manufacturer', 'model', 'firmware_version', 'serial_number', 'hardware_id']"
+                    :key="`device_info-${key}`">
+                    <v-list-item v-if="cameraData.device_info[key]">
+                      <v-list-item-title>{{ formatKey(key) }}</v-list-item-title>
+                      <v-list-item-subtitle>{{ cameraData.device_info[key] }}</v-list-item-subtitle>
+                    </v-list-item>
+                  </template>
+
+                  <!-- Additional fields outside device_info -->
+                  <template v-for="(value, key) in cameraData" :key="key">
+                    <template v-if="(key as unknown) !== 'device_info' && (key as unknown) !== 'profiles'">
+                      <v-list-item>
+                        <v-list-item-title>{{ formatKey(key) }}</v-list-item-title>
+                        <v-list-item-subtitle>{{ value }}</v-list-item-subtitle>
+                      </v-list-item>
+                    </template>
+                  </template>
                 </v-list>
 
                 <!-- Media Profiles -->
@@ -85,30 +72,18 @@
                     </v-expansion-panel-title>
                     <v-expansion-panel-text>
                       <v-list>
-                        <v-list-item>
-                          <v-list-item-title>Name</v-list-item-title>
-                          <v-list-item-subtitle>{{ profile.name }}</v-list-item-subtitle>
-                        </v-list-item>
-                        <v-list-item>
-                          <v-list-item-title>Token</v-list-item-title>
-                          <v-list-item-subtitle>{{ profile.token }}</v-list-item-subtitle>
-                        </v-list-item>
-                        <v-list-item>
-                          <v-list-item-title>Encoder</v-list-item-title>
-                          <v-list-item-subtitle>{{ profile.encoder }}</v-list-item-subtitle>
-                        </v-list-item>
-                        <v-list-item>
-                          <v-list-item-title>Resolution</v-list-item-title>
-                          <v-list-item-subtitle>{{ profile.resolution }}</v-list-item-subtitle>
-                        </v-list-item>
-                        <v-list-item>
-                          <v-list-item-title>Frame Rate</v-list-item-title>
-                          <v-list-item-subtitle>{{ profile.frame_rate }} fps</v-list-item-subtitle>
-                        </v-list-item>
-                        <v-list-item>
-                          <v-list-item-title>Bitrate</v-list-item-title>
-                          <v-list-item-subtitle>{{ profile.bitrate }} kbps</v-list-item-subtitle>
-                        </v-list-item>
+                        <!-- Loop through profile data -->
+                        <template v-for="(value, key) in profile" :key="key">
+                          <v-list-item>
+                            <v-list-item-title>{{ formatKey(key) }}</v-list-item-title>
+                            <v-list-item-subtitle>
+                              {{ value }}
+                              <!-- Add units for specific fields -->
+                              <span v-if="(key as unknown) === 'frame_rate'"> fps</span>
+                              <span v-if="(key as unknown) === 'bitrate'"> kbps</span>
+                            </v-list-item-subtitle>
+                          </v-list-item>
+                        </template>
                       </v-list>
                     </v-expansion-panel-text>
                   </v-expansion-panel>
@@ -117,6 +92,7 @@
             </v-card>
           </v-col>
           <v-col cols="4">
+
             <!-- PTZ Controls -->
             <v-card class="mt-4" v-if="cameraData.ptz_available">
               <v-card-title>PTZ Controls</v-card-title>
@@ -124,114 +100,60 @@
                 <v-container class="ptz-controls pr-0 pl-0">
                   <!-- Grid Container -->
                   <div class="ptz-grid">
-                    <!-- Top Left Button -->
-                    <v-btn icon class="ptz-button" @mousedown="startContinuousMove(-1, 1, 0)"
-                      @mouseup="stopContinuousMove" @mouseleave="stopContinuousMove">
-                      <v-icon>mdi-arrow-top-left</v-icon>
-                    </v-btn>
-
-                    <!-- Top Button -->
-                    <v-btn icon class="ptz-button" @mousedown="startContinuousMove(0, 1, 0)"
-                      @mouseup="stopContinuousMove" @mouseleave="stopContinuousMove">
-                      <v-icon>mdi-arrow-up</v-icon>
-                    </v-btn>
-
-                    <!-- Top Right Button -->
-                    <v-btn icon class="ptz-button" @mousedown="startContinuousMove(1, 1, 0)"
-                      @mouseup="stopContinuousMove" @mouseleave="stopContinuousMove">
-                      <v-icon>mdi-arrow-top-right</v-icon>
-                    </v-btn>
-
-                    <!-- Left Button -->
-                    <v-btn icon class="ptz-button" @mousedown="startContinuousMove(-1, 0, 0)"
-                      @mouseup="stopContinuousMove" @mouseleave="stopContinuousMove">
-                      <v-icon>mdi-arrow-left</v-icon>
-                    </v-btn>
+                    <!-- PTZ Buttons -->
+                    <template v-for="(button, index) in ptzButtons" :key="`ptz-button-${index}`">
+                      <v-btn icon class="ptz-button" @mousedown="startContinuousMove(...button.params)"
+                        @mouseup="stopContinuousMove" @mouseleave="stopContinuousMove">
+                        <v-icon>{{ button.icon }}</v-icon>
+                      </v-btn>
+                    </template>
 
                     <!-- Center Button -->
                     <v-btn icon class="ptz-button center-button" @click="ptzStop">
                       <v-icon>mdi-circle</v-icon>
                     </v-btn>
-
-                    <!-- Right Button -->
-                    <v-btn icon class="ptz-button" @mousedown="startContinuousMove(1, 0, 0)"
-                      @mouseup="stopContinuousMove" @mouseleave="stopContinuousMove">
-                      <v-icon>mdi-arrow-right</v-icon>
-                    </v-btn>
-
-                    <!-- Bottom Left Button -->
-                    <v-btn icon class="ptz-button" @mousedown="startContinuousMove(-1, -1, 0)"
-                      @mouseup="stopContinuousMove" @mouseleave="stopContinuousMove">
-                      <v-icon>mdi-arrow-bottom-left</v-icon>
-                    </v-btn>
-
-                    <!-- Bottom Button -->
-                    <v-btn icon class="ptz-button" @mousedown="startContinuousMove(0, -1, 0)"
-                      @mouseup="stopContinuousMove" @mouseleave="stopContinuousMove">
-                      <v-icon>mdi-arrow-down</v-icon>
-                    </v-btn>
-
-                    <!-- Bottom Right Button -->
-                    <v-btn icon class="ptz-button" @mousedown="startContinuousMove(1, -1, 0)"
-                      @mouseup="stopContinuousMove" @mouseleave="stopContinuousMove">
-                      <v-icon>mdi-arrow-bottom-right</v-icon>
-                    </v-btn>
                   </div>
 
                   <!-- Speed Control -->
-
                   <v-row class="mt-4" align="center">
-
                     <v-col cols="auto">
-
                       <span class="text-body-1">Speed (1-8):</span>
-
                     </v-col>
-
                     <v-col cols="auto" class="pa-0">
-
                       <v-select v-model="ptzSpeed" :items="[1, 2, 3, 4, 5, 6, 7, 8]" density="compact"
-                        style="width: 72px;"></v-select>
-
+                        style="width: 10vw;"></v-select>
                     </v-col>
-
                   </v-row>
 
                   <!-- Zoom Control -->
                   <v-row class="mt-4" align="center" justify="center">
-                    <v-col cols="auto" class="pa-0">
-                      <v-btn icon class="zoom-button" @mousedown="startContinuousMove(0, 0, -1)" @mouseup="ptzStop"
-                        @mouseleave="ptzStop">
-                        <v-icon>mdi-minus</v-icon>
-                      </v-btn>
-                    </v-col>
-                    <v-col cols="auto">
-                      <span class="text-body-1">Zoom</span>
-                    </v-col>
-                    <v-col cols="auto" class="pa-0">
-                      <v-btn icon class="zoom-button" @mousedown="startContinuousMove(0, 0, 1)" @mouseup="ptzStop"
-                        @mouseleave="ptzStop">
-                        <v-icon>mdi-plus</v-icon>
-                      </v-btn>
-                    </v-col>
+                    <template v-for="(button, index) in zoomButtons" :key="`zoom-button-${index}`">
+                      <v-col cols="auto" :class="{ 'pa-0': button.icon === 'mdi-minus' || button.icon === 'mdi-plus' }">
+                        <v-btn icon class="zoom-button" @mousedown="startContinuousMove(0, 0, button.zoomDirection)"
+                          @mouseup="ptzStop" @mouseleave="ptzStop">
+                          <v-icon>{{ button.icon }}</v-icon>
+                        </v-btn>
+                      </v-col>
+                      <!-- Add the Zoom Label only once -->
+                      <v-col v-if="index === 0" cols="auto">
+                        <span class="text-body-1">Zoom</span>
+                      </v-col>
+                    </template>
                   </v-row>
                   <!-- Focus Control -->
                   <v-row class="mt-4" align="center" justify="center">
-                    <v-col cols="auto" class="pa-0">
-                      <v-btn icon class="zoom-button" @mousedown="startFocusContinuous(-0.5)" @mouseup="stopFocus"
-                        @mouseleave="stopFocus">
-                        <v-icon>mdi-minus</v-icon>
-                      </v-btn>
-                    </v-col>
-                    <v-col cols="auto">
-                      <span class="text-body-1">Focus</span>
-                    </v-col>
-                    <v-col cols="auto" class="pa-0">
-                      <v-btn icon class="zoom-button" @mousedown="startFocusContinuous(0.5)" @mouseup="stopFocus"
-                        @mouseleave="stopFocus">
-                        <v-icon>mdi-plus</v-icon>
-                      </v-btn>
-                    </v-col>
+                    <template v-for="(button, index) in focusButtons" :key="`focus-button-${index}`">
+                      <v-col cols="auto" :class="{ 'pa-0': button.icon === 'mdi-minus' || button.icon === 'mdi-plus' }">
+                        <v-btn icon class="focus-button" @mousedown="startFocusContinuous(button.focusDirection)"
+                          @mouseup="stopFocus" @mouseleave="stopFocus">
+                          <v-icon>{{ button.icon }}</v-icon>
+                        </v-btn>
+                      </v-col>
+                      <!-- Add the Focus Label only once -->
+                      <v-col v-if="index === 0" cols="auto">
+                        <span class="text-body-1">Focus</span>
+                      </v-col>
+                    </template>
                   </v-row>
                 </v-container>
               </v-card-text>
@@ -263,6 +185,25 @@ export default {
     const streamUri = ref<string>('');
     const isMoving = ref(false);
     const ptzSpeed = ref(5); // Default speed is 5
+    const ptzButtons: { icon: string; params: [number, number, number] }[] = [
+      { icon: "mdi-arrow-top-left", params: [-1, 1, 0] },
+      { icon: "mdi-arrow-up", params: [0, 1, 0] },
+      { icon: "mdi-arrow-top-right", params: [1, 1, 0] },
+      { icon: "mdi-arrow-left", params: [-1, 0, 0] },
+      { icon: "mdi-arrow-right", params: [1, 0, 0] },
+      { icon: "mdi-arrow-bottom-left", params: [-1, -1, 0] },
+      { icon: "mdi-arrow-down", params: [0, -1, 0] },
+      { icon: "mdi-arrow-bottom-right", params: [1, -1, 0] },
+    ];
+    const zoomButtons = [
+      { icon: "mdi-minus", zoomDirection: -1 }, // Zoom out
+      { icon: "mdi-plus", zoomDirection: 1 },   // Zoom in
+    ];
+    const focusButtons = [
+      { icon: "mdi-minus", focusDirection: -0.5 }, // Decrease focus
+      { icon: "mdi-plus", focusDirection: 0.5 },   // Increase focus
+    ];
+
 
     const getOnvifCameraList = async () => {
       try {
@@ -274,6 +215,7 @@ export default {
         console.error('Failed to fetch ONVIF cameras:', error);
       }
     };
+
 
     const getOnvifCameraData = async () => {
       try {
@@ -296,6 +238,7 @@ export default {
       }
     };
 
+
     const selectProfile = async (token: string) => {
       try {
         if (flaskClient.value) {
@@ -305,15 +248,14 @@ export default {
             password.value,
             token
           );
-
           // Update the selected profile token and stream URI
           selectedProfileToken.value = token;
           console.log('Selected profile token:', token);
           console.log('Stream URI:', response.stream_uri);
           streamUri.value = response.stream_uri;
-
           // You can now use the stream URI to display the video stream
           // For example, pass it to a video player component
+
         } else {
           console.error('FlaskClient is not initialized.');
         }
@@ -321,6 +263,7 @@ export default {
         console.error('Failed to set ONVIF camera profile:', error);
       }
     };
+
 
     // Start continuous movement
     const startContinuousMove = async (panSpeed: number, tiltSpeed: number, zoomSpeed: number) => {
@@ -345,6 +288,7 @@ export default {
       }
     };
 
+
     // Stop continuous movement
     const stopContinuousMove = async () => {
       if (isMoving.value) {
@@ -363,6 +307,7 @@ export default {
         }
       }
     };
+
 
     // Fixed movement on click
     const ptzMove = async (panSpeed: number, tiltSpeed: number) => {
@@ -393,6 +338,7 @@ export default {
       }
     };
 
+
     const ptzStop = async () => {
       try {
         if (flaskClient.value && selectedProfileToken.value) {
@@ -408,69 +354,55 @@ export default {
       }
     };
 
+
     // Start continuous focus adjustment
 
     const startFocusContinuous = async (speed: number) => {
-
-try {
-
-  if (flaskClient.value && selectedProfileToken.value) {
-
-    await flaskClient.value.moveFocusContinuous(
-
-      selectedOnvifCamera.value,
-
-      username.value,
-
-      password.value,
-
-      selectedProfileToken.value,
-
-      speed
-
-    );
-
-  }
-
-} catch (error) {
-
-  console.error('Error starting continuous focus:', error);
-
-}
-
-};
+      try {
+        if (flaskClient.value && selectedProfileToken.value) {
+          await flaskClient.value.moveFocusContinuous(
+            selectedOnvifCamera.value,
+            username.value,
+            password.value,
+            selectedProfileToken.value,
+            speed
+          );
+        }
+      } catch (error) {
+        console.error('Error starting continuous focus:', error);
+      }
+    };
 
 
+    // Stop focus adjustment
 
-// Stop focus adjustment
+    const stopFocus = async () => {
 
-const stopFocus = async () => {
+      try {
+        if (flaskClient.value && selectedProfileToken.value) {
+          await flaskClient.value.stopFocus(
+            selectedOnvifCamera.value,
+            username.value,
+            password.value,
+            selectedProfileToken.value
+          );
+        }
+      } catch (error) {
+        console.error('Error stopping focus:', error);
+      }
+    };
 
-try {
 
-  if (flaskClient.value && selectedProfileToken.value) {
+    const formatKey = (key: string | number): string => {
+      // Ensure the key is treated as a string
+      const keyString = String(key);
 
-    await flaskClient.value.stopFocus(
+      return keyString
+        .split("_")
+        .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    };
 
-      selectedOnvifCamera.value,
-
-      username.value,
-
-      password.value,
-
-      selectedProfileToken.value
-
-    );
-
-  }
-
-} catch (error) {
-
-  console.error('Error stopping focus:', error);
-
-}
-
-};
 
     onMounted(() => {
       flaskClient.value = new FlaskClient('http://127.0.0.1:5000');
@@ -479,6 +411,7 @@ try {
       onvifCameraListInterval = setInterval(getOnvifCameraList, 60000);
     });
 
+
     // Clear the interval when the component is unmounted
     onUnmounted(() => {
       if (onvifCameraListInterval) {
@@ -486,6 +419,7 @@ try {
       }
 
     });
+
 
     return {
       getOnvifCameraList,
@@ -497,6 +431,7 @@ try {
       ptzStop,
       startFocusContinuous,
       stopFocus,
+      formatKey,
       onvifCameras,
       selectedOnvifCamera,
       username,
@@ -505,6 +440,9 @@ try {
       errorMessage,
       selectedProfileToken,
       ptzSpeed,
+      ptzButtons,
+      zoomButtons,
+      focusButtons,
     };
   },
 };
@@ -532,5 +470,9 @@ try {
 .center-button {
   width: 100%;
   height: 100%;
+  grid-column: 2;
+  /* Center column */
+  grid-row: 2;
+  /* Center row */
 }
 </style>
