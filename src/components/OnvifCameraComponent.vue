@@ -6,16 +6,16 @@
         <v-row align="center">
           <v-col cols="auto">
             <v-select v-model="selectedOnvifCamera" :items="onvifCameras" item-title="ip" item-value="ip"
-              label="Select a Camera" style="width: 15vw;"></v-select>
+              label="Select a Camera" style="width: 15vw; min-width: 130px;"></v-select>
           </v-col>
           <v-col cols="auto">
-            <v-text-field v-model="username" label="Username" style="width: 15vw;"></v-text-field>
+            <v-text-field v-model="username" label="Username" style="width: 15vw; min-width: 130px;"></v-text-field>
           </v-col>
           <v-col cols="auto">
-            <v-text-field v-model="password" label="Password" type="password" style="width: 15vw;"></v-text-field>
+            <v-text-field v-model="password" label="Password" type="password" style="width: 15vw; min-width: 130px;"></v-text-field>
           </v-col>
           <v-col cols="auto">
-            <v-btn @click="getOnvifCameraData" color="primary" style="height: 7vh;">Get Data</v-btn>
+            <v-btn @click="getOnvifCameraData" color="primary" style="width: 10vw; min-width: 90px;">Get Data</v-btn>
           </v-col>
         </v-row>
 
@@ -121,7 +121,7 @@
                     </v-col>
                     <v-col cols="auto" class="pa-0">
                       <v-select v-model="ptzSpeed" :items="[1, 2, 3, 4, 5, 6, 7, 8]" density="compact"
-                        style="width: 10vw;"></v-select>
+                        style="width: 10vw; min-width: 75px;"></v-select>
                     </v-col>
                   </v-row>
 
