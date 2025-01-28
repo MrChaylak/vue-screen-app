@@ -46,7 +46,8 @@ export class FlaskClient {
           });
     
           if (!response.ok) {
-            throw new Error('Failed to fetch ONVIF camera data');
+            const data = await response.json();
+            throw new Error(data.error);
           }
     
           const data = await response.json();

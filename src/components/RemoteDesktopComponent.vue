@@ -15,9 +15,6 @@
               <v-btn @click="toggleFullscreen" color="primary" class="mx-3">
                 Fullscreen
               </v-btn>
-              <!-- <v-btn icon @click="toggleTheme" class="mx-3">
-                <v-icon>{{ isDarkTheme ? 'mdi-white-balance-sunny' : 'mdi-moon-waning-crescent' }}</v-icon>
-              </v-btn> -->
             </v-col>
           </v-row>
         </v-container>
@@ -80,10 +77,10 @@
   
   <script lang="ts">
   import { useTheme } from 'vuetify';
-  import { defineComponent, nextTick, onMounted, ref, onUnmounted, computed } from "vue";
+  import { nextTick, onMounted, ref, onUnmounted, computed } from "vue";
   import { WebRTCClient } from "@/service/signaling";
   
-  export default defineComponent({
+  export default {
     name: "RemoteDesktopComponent",
     setup() {
       const webrtcClient = ref<WebRTCClient | null>(null);
@@ -93,16 +90,7 @@
       const isScreenSharing = ref(false); // Track screen share status
       const sharedScreen = ref<string>("");
       const screenSelectionDialog = ref(false); // Control dialog visibility
-      let screenListInterval: number | null = null; // Store the interval ID     
-      const theme = useTheme();
-
-    // Computed to know if the current theme is dark
-    const isDarkTheme = computed(() => theme.global.current.value.dark);
-
-    const toggleTheme = () => {
-      // Toggle between light and dark themes
-      theme.global.name.value = isDarkTheme.value ? 'light' : 'dark';
-    };
+      let screenListInterval: number | null = null; // Store the interval ID
 
       const getScreenList = () => {
         webrtcClient.value?.requestScreenList();
@@ -276,9 +264,6 @@
         openScreenSelectionDialog,
         closeScreenSelectionDialog,
         selectScreen,
-        theme,
-        toggleTheme,
-        isDarkTheme,
         handleMouseMove,
         handleMouseClick,
         handleMouseWheel,
@@ -287,7 +272,7 @@
         toggleFullscreen,
       };
     },
-  });
+  };
   </script>
   
   <style>

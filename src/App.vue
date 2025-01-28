@@ -32,21 +32,17 @@
 
 <script lang="ts">
 import { RouterLink, RouterView } from 'vue-router';
-import { useTheme } from 'vuetify';
-import { ref, computed } from 'vue';
+import { useThemeMixin } from './mixins/themeMixin';
 
 export default {
+  name: 'App',
+  components: { RouterLink, RouterView },
+  mixins: [useThemeMixin],
+
   setup() {
-      const theme = useTheme();
-
-      // Computed to know if the current theme is dark
-      const isDarkTheme = computed(() => theme.global.current.value.dark);
-
-      const toggleTheme = () => {
-        // Toggle between light and dark themes
-        theme.global.name.value = isDarkTheme.value ? 'light' : 'dark';
-      };
-
+      // Use the mixin
+      const { theme, toggleTheme, isDarkTheme } = useThemeMixin();
+    
       return { theme, toggleTheme, isDarkTheme };
   }
 };
