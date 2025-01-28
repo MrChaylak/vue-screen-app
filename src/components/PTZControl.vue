@@ -10,13 +10,13 @@
           <!-- PTZ Buttons -->
           <template v-for="(button, index) in ptzButtons" :key="`ptz-button-${index}`">
             <v-btn icon class="ptz-button" @mousedown="startContinuousMove(...button.params)"
-              @mouseup="stopContinuousMove" @mouseleave="stopContinuousMove">
+              @mouseup="stopContinuousMove">
               <v-icon>{{ button.icon }}</v-icon>
             </v-btn>
           </template>
 
           <!-- Center Button -->
-          <v-btn icon class="ptz-button center-button" @click="ptzStop">
+          <v-btn icon class="ptz-button center-button" @click="stopContinuousMove">
             <v-icon>mdi-circle</v-icon>
           </v-btn>
         </div>
@@ -37,7 +37,7 @@
           <template v-for="(button, index) in zoomButtons" :key="`zoom-button-${index}`">
             <v-col cols="auto" :class="{ 'pa-0': button.icon === 'mdi-minus' || button.icon === 'mdi-plus' }">
               <v-btn icon class="zoom-button" @mousedown="startContinuousMove(0, 0, button.zoomDirection)"
-                @mouseup="ptzStop" @mouseleave="ptzStop">
+                @mouseup="stopContinuousMove">
                 <v-icon>{{ button.icon }}</v-icon>
               </v-btn>
             </v-col>
@@ -52,7 +52,7 @@
           <template v-for="(button, index) in focusButtons" :key="`focus-button-${index}`">
             <v-col cols="auto" :class="{ 'pa-0': button.icon === 'mdi-minus' || button.icon === 'mdi-plus' }">
               <v-btn icon class="focus-button" @mousedown="startFocusContinuous(button.focusDirection)"
-                @mouseup="stopFocus" @mouseleave="stopFocus">
+                @mouseup="stopFocus">
                 <v-icon>{{ button.icon }}</v-icon>
               </v-btn>
             </v-col>
@@ -75,10 +75,6 @@ export default {
   name: 'PTZControl',
 
   props: {
-    selectedProfileToken: {
-      type: String,
-      required: true
-    },
     selectedOnvifCamera: {
       type: String,
       required: true
@@ -91,11 +87,14 @@ export default {
       type: String,
       required: true
     },
+    selectedProfileToken: {
+      type: String,
+      required: true
+    },
   },
 
   setup(props) {
     const flaskClient = ref<FlaskClient | null>(null);
-    const isMoving = ref(false);
     const ptzSpeed = ref(5); // Default speed is 5
     const ptzButtons: { icon: string; params: [number, number, number] }[] = [
       { icon: "mdi-arrow-top-left", params: [-1, 1, 0] },
@@ -118,7 +117,6 @@ export default {
 
     // Start continuous movement
     const startContinuousMove = async (panSpeed: number, tiltSpeed: number, zoomSpeed: number) => {
-      isMoving.value = true;
       const adjustedPanSpeed = panSpeed * (ptzSpeed.value / 8);
       const adjustedTiltSpeed = tiltSpeed * (ptzSpeed.value / 8);
       const adjustedZoomSpeed = zoomSpeed;
@@ -142,8 +140,6 @@ export default {
 
     // Stop continuous movement
     const stopContinuousMove = async () => {
-      if (isMoving.value) {
-        isMoving.value = false;
         try {
           if (flaskClient.value && props.selectedProfileToken) {
             await flaskClient.value.ptzStop(
@@ -156,58 +152,10 @@ export default {
         } catch (error) {
           console.error('Failed to stop PTZ movement:', error);
         }
-      }
-    };
-
-
-    // Fixed movement on click
-    const ptzMove = async (panSpeed: number, tiltSpeed: number) => {
-      try {
-        if (flaskClient.value && props.selectedProfileToken) {
-          await flaskClient.value.ptzMove(
-            props.selectedOnvifCamera,
-            props.username,
-            props.password,
-            props.selectedProfileToken,
-            panSpeed,
-            tiltSpeed,
-            0 // Zoom speed (0 for no zoom)
-          );
-
-          // Stop after a short delay (e.g., 200ms)
-          setTimeout(() => {
-            flaskClient.value?.ptzStop(
-              props.selectedOnvifCamera,
-              props.username,
-              props.password,
-              props.selectedProfileToken,
-            );
-          }, 200);
-        }
-      } catch (error) {
-        console.error('Failed to perform PTZ movement:', error);
-      }
-    };
-
-
-    const ptzStop = async () => {
-      try {
-        if (flaskClient.value && props.selectedProfileToken) {
-          await flaskClient.value.ptzStop(
-            props.selectedOnvifCamera,
-            props.username,
-            props.password,
-            props.selectedProfileToken,
-          );
-        }
-      } catch (error) {
-        console.error('Failed to stop PTZ movement:', error);
-      }
     };
 
 
     // Start continuous focus adjustment
-
     const startFocusContinuous = async (speed: number) => {
       try {
         if (flaskClient.value && props.selectedProfileToken) {
@@ -226,9 +174,7 @@ export default {
 
 
     // Stop focus adjustment
-
     const stopFocus = async () => {
-
       try {
         if (flaskClient.value && props.selectedProfileToken) {
           await flaskClient.value.stopFocus(
@@ -248,15 +194,12 @@ export default {
     });
 
     return {
-      isMoving,
       ptzSpeed,
       ptzButtons,
       zoomButtons,
       focusButtons,
       startContinuousMove,
       stopContinuousMove,
-      ptzMove,
-      ptzStop,
       startFocusContinuous,
       stopFocus,
     };

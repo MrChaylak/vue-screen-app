@@ -35,6 +35,10 @@ import { RouterLink, RouterView } from 'vue-router';
 import { useThemeMixin } from './mixins/themeMixin';
 
 export default {
+  name: 'App',
+  components: { RouterLink, RouterView },
+  mixins: [useThemeMixin],
+
   setup() {
       // Use the mixin
       const { theme, toggleTheme, isDarkTheme } = useThemeMixin();
