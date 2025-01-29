@@ -5,6 +5,11 @@
         <!-- Input Fields and Button -->
         <v-row align="center">
           <v-col cols="auto">
+            <v-btn @click="getOnvifCameraList" color="primary" style="width: 2vw; min-width: 40px;" >
+              <v-icon left>mdi-refresh</v-icon>
+            </v-btn>
+          </v-col>
+          <v-col cols="auto">
             <v-select v-model="selectedOnvifCamera" :items="onvifCameras" item-title="ip" item-value="ip"
               label="Select a Camera" style="width: 15vw; min-width: 130px;"></v-select>
           </v-col>
@@ -208,7 +213,7 @@ export default {
       flaskClient.value = new FlaskClient('http://127.0.0.1:5000');
       getOnvifCameraList();
 
-      onvifCameraListInterval = setInterval(getOnvifCameraList, 60000);
+      // onvifCameraListInterval = setInterval(getOnvifCameraList, 60000);
     });
 
 
