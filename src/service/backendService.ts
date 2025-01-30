@@ -164,7 +164,7 @@ export class FlaskClient {
     }
   }
 
-  async moveFocusContinuous(ip: string, username: string, password: string, speed: number): Promise<{ message: string }> {
+  async moveFocusContinuous(ip: string, username: string, password: string, focusSpeed: number): Promise<{ message: string }> {
     try {
       const response = await fetch(`${this.baseUrl}/api/move-focus-continuous`, {
         method: 'POST',
@@ -175,7 +175,7 @@ export class FlaskClient {
           ip,
           username,
           password,
-          speed,
+          focus_speed: focusSpeed,  // match the backend field name
         }),
       });
 

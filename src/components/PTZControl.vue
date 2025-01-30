@@ -158,14 +158,14 @@ export default {
 
 
     // Start continuous focus adjustment
-    const startFocusContinuous = async (speed: number) => {
+    const startFocusContinuous = async (focusSpeed: number) => {
       try {
         if (flaskClient.value) {
           const response = await flaskClient.value.moveFocusContinuous(
             props.selectedOnvifCamera,
             props.username,
             props.password,
-            speed
+            focusSpeed
           );
           console.log(response.message)
         }
