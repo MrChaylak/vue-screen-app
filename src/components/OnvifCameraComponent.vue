@@ -209,7 +209,7 @@ export default {
         } else {
           console.error('FlaskClient is not initialized.');
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to set ONVIF camera profile:', error);
       }
     };

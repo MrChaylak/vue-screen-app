@@ -132,7 +132,7 @@ export default {
             adjustedZoomSpeed,
           );
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to perform PTZ movement:', error);
       }
     };
@@ -149,7 +149,7 @@ export default {
               props.selectedProfileToken,
             );
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error('Failed to stop PTZ movement:', error);
         }
     };
@@ -167,7 +167,7 @@ export default {
             speed
           );
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error starting continuous focus:', error);
       }
     };
@@ -184,7 +184,7 @@ export default {
             props.selectedProfileToken,
           );
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error stopping focus:', error);
       }
     };
