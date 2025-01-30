@@ -86,16 +86,16 @@ export class FlaskClient {
           ip,
           username,
           password,
-          profileToken,
+          profileToken,  // match the backend field name
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to set ONVIF camera profile');
-      }
-
       const data = await response.json();
-      return data; // Ensure the response contains `stream_uri`
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to set ONVIF camera profile');
+      }
+      return data;
+
     } catch (error) {
       console.error('Error setting ONVIF camera profile:', error);
       throw error;
@@ -170,7 +170,7 @@ export class FlaskClient {
           ip,
           username,
           password,
-          profileToken,
+          profile_token: profileToken,  // match the backend field name
           speed,
         }),
       });
@@ -198,7 +198,7 @@ export class FlaskClient {
           ip,
           username,
           password,
-          profileToken,
+          profile_token: profileToken,  // match the backend field name
         }),
       });
 
