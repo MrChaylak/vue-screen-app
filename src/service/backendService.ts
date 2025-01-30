@@ -164,7 +164,7 @@ export class FlaskClient {
     }
   }
 
-  async moveFocusContinuous(ip: string, username: string, password: string, profileToken: string, speed: number): Promise<{ message: string }> {
+  async moveFocusContinuous(ip: string, username: string, password: string, speed: number): Promise<{ message: string }> {
     try {
       const response = await fetch(`${this.baseUrl}/api/move-focus-continuous`, {
         method: 'POST',
@@ -175,7 +175,6 @@ export class FlaskClient {
           ip,
           username,
           password,
-          profile_token: profileToken,  // match the backend field name
           speed,
         }),
       });
@@ -196,7 +195,7 @@ export class FlaskClient {
     }
   }
 
-  async stopFocus(ip: string, username: string, password: string, profileToken: string): Promise<{ message: string }> {
+  async stopFocus(ip: string, username: string, password: string): Promise<{ message: string }> {
     try {
       const response = await fetch(`${this.baseUrl}/api/stop-focus`, {
         method: 'POST',
@@ -207,7 +206,6 @@ export class FlaskClient {
           ip,
           username,
           password,
-          profile_token: profileToken,  // match the backend field name
         }),
       });
 
