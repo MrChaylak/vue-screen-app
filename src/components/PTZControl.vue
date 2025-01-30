@@ -69,7 +69,7 @@
 
 <script lang="ts">
 import { onMounted, ref, onUnmounted } from 'vue';
-import { FlaskClient } from '@/service/flask';
+import { FlaskClient } from '@/service/backendService';
 
 export default {
   name: 'PTZControl',
@@ -122,7 +122,7 @@ export default {
       const adjustedZoomSpeed = zoomSpeed;
       try {
         if (flaskClient.value && props.selectedProfileToken) {
-          await flaskClient.value.ptzMove(
+          const response = await flaskClient.value.ptzMove(
             props.selectedOnvifCamera,
             props.username,
             props.password,
@@ -131,8 +131,9 @@ export default {
             adjustedTiltSpeed,
             adjustedZoomSpeed,
           );
+          console.log(response.message)
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to perform PTZ movement:', error);
       }
     };
@@ -142,32 +143,33 @@ export default {
     const stopContinuousMove = async () => {
         try {
           if (flaskClient.value && props.selectedProfileToken) {
-            await flaskClient.value.ptzStop(
+            const response = await flaskClient.value.ptzStop(
               props.selectedOnvifCamera,
               props.username,
               props.password,
               props.selectedProfileToken,
             );
+            console.log(response.message)
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error('Failed to stop PTZ movement:', error);
         }
     };
 
 
     // Start continuous focus adjustment
-    const startFocusContinuous = async (speed: number) => {
+    const startFocusContinuous = async (focusSpeed: number) => {
       try {
-        if (flaskClient.value && props.selectedProfileToken) {
-          await flaskClient.value.moveFocusContinuous(
+        if (flaskClient.value) {
+          const response = await flaskClient.value.moveFocusContinuous(
             props.selectedOnvifCamera,
             props.username,
             props.password,
-            props.selectedProfileToken,
-            speed
+            focusSpeed
           );
+          console.log(response.message)
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error starting continuous focus:', error);
       }
     };
@@ -176,15 +178,15 @@ export default {
     // Stop focus adjustment
     const stopFocus = async () => {
       try {
-        if (flaskClient.value && props.selectedProfileToken) {
-          await flaskClient.value.stopFocus(
+        if (flaskClient.value) {
+          const response = await flaskClient.value.stopFocus(
             props.selectedOnvifCamera,
             props.username,
             props.password,
-            props.selectedProfileToken,
           );
+        console.log(response.message)
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error stopping focus:', error);
       }
     };

@@ -3,26 +3,45 @@
     <v-card-text class="pa-0">
       <v-container>
         <!-- Input Fields and Button -->
-        <v-row align="center">
-          <v-col cols="auto">
-            <v-btn @click="getOnvifCameraList" color="primary" style="width: 2vw; min-width: 40px;" >
-              <v-icon left>mdi-refresh</v-icon>
-            </v-btn>
-          </v-col>
-          <v-col cols="auto">
-            <v-select v-model="selectedOnvifCamera" :items="onvifCameras" item-title="ip" item-value="ip"
-              label="Select a Camera" style="width: 15vw; min-width: 130px;"></v-select>
-          </v-col>
-          <v-col cols="auto">
-            <v-text-field v-model="username" label="Username" style="width: 15vw; min-width: 130px;"></v-text-field>
-          </v-col>
-          <v-col cols="auto">
-            <v-text-field v-model="password" label="Password" type="password" style="width: 15vw; min-width: 130px;"></v-text-field>
-          </v-col>
-          <v-col cols="auto">
-            <v-btn @click="getOnvifCameraData" color="primary" style="width: 10vw; min-width: 90px;">Get Data</v-btn>
-          </v-col>
-        </v-row>
+        <v-form v-model="formValid" @submit.prevent="getOnvifCameraData">
+          <v-row align="center">
+            <!-- Refresh Button -->
+            <v-col cols="auto">
+              <v-btn @click="getOnvifCameraList" color="primary" style="width: 2vw; min-width: 40px;">
+                <v-icon left>mdi-refresh</v-icon>
+              </v-btn>
+            </v-col>
+
+            <!-- Camera Select -->
+            <v-col cols="auto">
+              <v-select v-model="selectedOnvifCamera" :items="onvifCameras" item-title="ip" item-value="ip"
+                label="Select a Camera" style="width: 15vw; min-width: 130px;"
+                :rules="[v => !!v || 'Camera is required']"></v-select>
+            </v-col>
+
+            <!-- Username Input -->
+            <v-col cols="auto">
+              <v-text-field v-model="username" label="Username" style="width: 15vw; min-width: 130px;"
+                :rules="[v => !!v || 'Username is required']"></v-text-field>
+            </v-col>
+
+            <!-- Password Input -->
+            <v-col cols="auto">
+              <v-text-field v-model="password" label="Password" type="password" style="width: 15vw; min-width: 130px;"
+                :rules="[
+                  v => !!v || 'Password is required',
+                  v => (v && v.length >= 8) || 'Password must be at least 8 characters',
+                ]"></v-text-field>
+            </v-col>
+
+            <!-- Get Data Button -->
+            <v-col cols="auto">
+              <v-btn type="submit" color="primary" style="width: 10vw; min-width: 90px;" :disabled="!formValid">
+                Get Data
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-form>
 
         <!-- Error Message -->
         <v-row v-if="errorMessage">
@@ -43,11 +62,10 @@
                 <!-- Device Information -->
                 <v-list>
                   <!-- Custom order for device_info -->
-                  <template v-for="key in ['manufacturer', 'model', 'firmware_version', 'serial_number', 'hardware_id']"
-                    :key="`device_info-${key}`">
-                    <v-list-item v-if="cameraData.device_info[key]">
+                  <template v-for="(value, key) in cameraData.device_info" :key="`device_info-${key}`">
+                    <v-list-item v-if="value">
                       <v-list-item-title>{{ formatKey(key) }}</v-list-item-title>
-                      <v-list-item-subtitle>{{ cameraData.device_info[key] }}</v-list-item-subtitle>
+                      <v-list-item-subtitle>{{ value }}</v-list-item-subtitle>
                     </v-list-item>
                   </template>
 
@@ -99,13 +117,8 @@
           <v-col cols="4">
 
             <!-- PTZ Controls -->
-            <PTZControl
-              v-if="cameraData.ptz_available"
-              :selectedProfileToken="selectedProfileToken"
-              :selectedOnvifCamera="selectedOnvifCamera"
-              :username="username"
-              :password="password"
-            />
+            <PTZControl v-if="cameraData.ptz_available" :selectedProfileToken="selectedProfileToken"
+              :selectedOnvifCamera="selectedOnvifCamera" :username="username" :password="password" />
 
           </v-col>
         </v-row>
@@ -116,7 +129,7 @@
 
 <script lang="ts">
 import { onMounted, ref, onUnmounted } from 'vue';
-import { FlaskClient } from '@/service/flask';
+import { FlaskClient } from '@/service/backendService';
 import { nextTick } from 'vue';
 import PTZControl from './PTZControl.vue';
 
@@ -128,6 +141,7 @@ export default {
     const flaskClient = ref<FlaskClient | null>(null);
     const onvifCameras = ref<Array<{ ip: string; }>>([]);
     const selectedOnvifCamera = ref<string>('');
+    const formValid = ref(false);
     const username = ref<string>('');
     const password = ref<string>('');
     const cameraData = ref<any>(null);
@@ -135,7 +149,6 @@ export default {
     const selectedProfileToken = ref<string>('');
     let onvifCameraListInterval: number | null = null;
     const streamUri = ref<string>('');
-    const isMoving = ref(false);
 
 
     const getOnvifCameraList = async () => {
@@ -152,7 +165,11 @@ export default {
 
     const getOnvifCameraData = async () => {
       try {
-        if (flaskClient.value) {
+        if (!formValid.value) {
+          errorMessage.value = 'Please fix the errors before submitting.';
+          return;
+        }
+        else if (flaskClient.value) {
           const data = await flaskClient.value.getOnvifCameraData(
             selectedOnvifCamera.value,
             username.value,
@@ -185,14 +202,14 @@ export default {
           selectedProfileToken.value = token;
           console.log('Selected profile token:', token);
           console.log('Stream URI:', response.stream_uri);
-          streamUri.value = response.stream_uri;
+          // // streamUri.value = response.stream_uri;
           // You can now use the stream URI to display the video stream
           // For example, pass it to a video player component
 
         } else {
           console.error('FlaskClient is not initialized.');
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to set ONVIF camera profile:', error);
       }
     };
@@ -233,6 +250,7 @@ export default {
       formatKey,
       onvifCameras,
       selectedOnvifCamera,
+      formValid,
       username,
       password,
       cameraData,

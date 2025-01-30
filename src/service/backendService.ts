@@ -7,11 +7,15 @@ export class FlaskClient {
 
   async getOnvifCameraList(): Promise<{ devices: string[] }> {
     const response = await fetch(this.baseUrl + '/api/onvif-devices');
-    if (!response.ok) {
-      throw new Error('Failed to fetch ONVIF devices');
-    }
-
     const data = await response.json();
+      
+    if (!response.ok) {
+      if (typeof data.error === 'object') {
+        const errorMessages = Object.values(data.error).join(', ');
+        throw new Error(errorMessages || 'Failed to get ONVIF camera list');
+      }
+      throw new Error(data.error || 'Failed to get ONVIF camera list');
+    }
 
     // Sort the IP addresses in ascending order
     data.devices.sort((a: string, b: string) => {
@@ -45,30 +49,18 @@ export class FlaskClient {
         }),
       });
 
-      if (!response.ok) {
-        const data: { errors?: Record<string, string[]>; error?: string } = await response.json();
-        // console.log(data);
-
-        let errorMessage = "";
-
-        if (data.errors && typeof data.errors === "object") {
-          // Flatten all error messages into a single string without field names
-          errorMessage = Object.values(data.errors)
-            .flat() // Flatten array of arrays (if needed)
-            .join(", "); // Join all messages with ", "
-          errorMessage = errorMessage.endsWith('.') ? errorMessage : errorMessage + '.';
-        } else if (typeof data.error === "string") {
-          errorMessage = data.error; // Handle single error message
-        } else {
-          errorMessage = "An unknown error occurred.";
-        }
-
-        throw new Error(errorMessage); // Only throws the actual message
-      }
-
       const data = await response.json();
+      
+      if (!response.ok) {
+        if (typeof data.error === 'object') {
+          const errorMessages = Object.values(data.error).join(', ');
+          throw new Error(errorMessages || 'Failed to fetch ONVIF camera data');
+        }
+        throw new Error(data.error || 'Failed to fetch ONVIF camera data');
+      }
       // console.log(data);
       return data;
+
     } catch (error) {
       console.error('Error fetching ONVIF camera data:', error);
       throw error;
@@ -86,16 +78,21 @@ export class FlaskClient {
           ip,
           username,
           password,
-          profileToken,
+          profile_token: profileToken,  // match the backend field name
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to set ONVIF camera profile');
-      }
-
       const data = await response.json();
-      return data; // Ensure the response contains `stream_uri`
+      
+      if (!response.ok) {
+        if (typeof data.error === 'object') {
+          const errorMessages = Object.values(data.error).join(', ');
+          throw new Error(errorMessages || 'Failed to set ONVIF camera profile');
+        }
+        throw new Error(data.error || 'Failed to set ONVIF camera profile');
+      }
+      return data;
+
     } catch (error) {
       console.error('Error setting ONVIF camera profile:', error);
       throw error;
@@ -120,12 +117,16 @@ export class FlaskClient {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to stop PTZ movement');
-      }
-
       const data = await response.json();
-      return data; // Ensure the response contains a success message
+      
+      if (!response.ok) {
+        if (typeof data.error === 'object') {
+          const errorMessages = Object.values(data.error).join(', ');
+          throw new Error(errorMessages || 'Failed to start PTZ movement');
+        }
+        throw new Error(data.error || 'Failed to start PTZ movement');
+      }
+      return data;
     } catch (error) {
       console.error('Error performing PTZ movement:', error);
       throw error;
@@ -147,11 +148,15 @@ export class FlaskClient {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to stop PTZ movement');
-      }
-
       const data = await response.json();
+      
+      if (!response.ok) {
+        if (typeof data.error === 'object') {
+          const errorMessages = Object.values(data.error).join(', ');
+          throw new Error(errorMessages || 'Failed to stop PTZ movement');
+        }
+        throw new Error(data.error || 'Failed to stop PTZ movement');
+      }
       return data; // Ensure the response contains a success message
     } catch (error) {
       console.error('Error stopping PTZ movement:', error);
@@ -159,7 +164,7 @@ export class FlaskClient {
     }
   }
 
-  async moveFocusContinuous(ip: string, username: string, password: string, profileToken: string, speed: number): Promise<{ message: string }> {
+  async moveFocusContinuous(ip: string, username: string, password: string, focusSpeed: number): Promise<{ message: string }> {
     try {
       const response = await fetch(`${this.baseUrl}/api/move-focus-continuous`, {
         method: 'POST',
@@ -170,16 +175,19 @@ export class FlaskClient {
           ip,
           username,
           password,
-          profileToken,
-          speed,
+          focus_speed: focusSpeed,  // match the backend field name
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to start continuous focus adjustment');
-      }
-
       const data = await response.json();
+      
+      if (!response.ok) {
+        if (typeof data.error === 'object') {
+          const errorMessages = Object.values(data.error).join(', ');
+          throw new Error(errorMessages || 'Failed to start continuous focus adjustment');
+        }
+        throw new Error(data.error || 'Failed to start continuous focus adjustment');
+      }
       return data; // Ensure the response contains a success message
     } catch (error) {
       console.error('Error starting continuous focus adjustment:', error);
@@ -187,7 +195,7 @@ export class FlaskClient {
     }
   }
 
-  async stopFocus(ip: string, username: string, password: string, profileToken: string): Promise<{ message: string }> {
+  async stopFocus(ip: string, username: string, password: string): Promise<{ message: string }> {
     try {
       const response = await fetch(`${this.baseUrl}/api/stop-focus`, {
         method: 'POST',
@@ -198,16 +206,19 @@ export class FlaskClient {
           ip,
           username,
           password,
-          profileToken,
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to stop focus adjustment');
-      }
-
       const data = await response.json();
-      return data; // Ensure the response contains a success message
+      
+      if (!response.ok) {
+        if (typeof data.error === 'object') {
+          const errorMessages = Object.values(data.error).join(', ');
+          throw new Error(errorMessages || 'Failed to stop focus adjustment');
+        }
+        throw new Error(data.error || 'Failed to stop focus adjustment');
+      }
+      return data;
     } catch (error) {
       console.error('Error stopping focus adjustment:', error);
       throw error;
