@@ -201,7 +201,7 @@ export default {
           // Update the selected profile token and stream URI
           selectedProfileToken.value = token;
           console.log('Selected profile token:', token);
-          console.log('Stream URI:', response.message);
+          console.log('Stream URI:', response.stream_uri);
           // // streamUri.value = response.stream_uri;
           // You can now use the stream URI to display the video stream
           // For example, pass it to a video player component
