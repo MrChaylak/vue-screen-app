@@ -129,7 +129,7 @@
 
 <script lang="ts">
 import { onMounted, ref, onUnmounted } from 'vue';
-import { FlaskClient } from '@/service/flask';
+import { FlaskClient } from '@/service/backendService';
 import { nextTick } from 'vue';
 import PTZControl from './PTZControl.vue';
 

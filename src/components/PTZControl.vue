@@ -69,7 +69,7 @@
 
 <script lang="ts">
 import { onMounted, ref, onUnmounted } from 'vue';
-import { FlaskClient } from '@/service/flask';
+import { FlaskClient } from '@/service/backendService';
 
 export default {
   name: 'PTZControl',
