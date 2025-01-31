@@ -6,7 +6,7 @@ export class FlaskClient {
   }
 
   async getOnvifCameraList(): Promise<{ devices: string[] }> {
-    const response = await fetch(this.baseUrl + '/api/onvif-devices');
+    const response = await fetch(this.baseUrl + '/api/discovery/onvif-devices');
     const data = await response.json();
       
     if (!response.ok) {
@@ -37,7 +37,7 @@ export class FlaskClient {
   async getOnvifCameraData(ip: string, username: string, password: string): Promise<any> {
     try {
       // Send a request to your Flask backend to fetch ONVIF camera data
-      const response = await fetch(`${this.baseUrl}/api/onvif-camera-data`, {
+      const response = await fetch(`${this.baseUrl}/api/camera/data`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ export class FlaskClient {
 
   async setOnvifCameraProfile(ip: string, username: string, password: string, profileToken: string): Promise<{ stream_uri: string }> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/set-onvif-camera-profile`, {
+      const response = await fetch(`${this.baseUrl}/api/camera/set-profile`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,7 +101,7 @@ export class FlaskClient {
 
   async ptzMove(ip: string, username: string, password: string, profileToken: string, panSpeed: number, tiltSpeed: number, zoomSpeed: number): Promise<{ message: string }> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/ptz-move`, {
+      const response = await fetch(`${this.baseUrl}/api/ptz/move`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +135,7 @@ export class FlaskClient {
 
   async ptzStop(ip: string, username: string, password: string, profileToken: string): Promise<{ message: string }> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/ptz-stop`, {
+      const response = await fetch(`${this.baseUrl}/api/ptz/stop`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -166,7 +166,7 @@ export class FlaskClient {
 
   async moveFocusContinuous(ip: string, username: string, password: string, focusSpeed: number): Promise<{ message: string }> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/move-focus-continuous`, {
+      const response = await fetch(`${this.baseUrl}/api/focus/move`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -197,7 +197,7 @@ export class FlaskClient {
 
   async stopFocus(ip: string, username: string, password: string): Promise<{ message: string }> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/stop-focus`, {
+      const response = await fetch(`${this.baseUrl}/api/focus/stop`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
