@@ -5,34 +5,34 @@ export class FlaskClient {
     this.baseUrl = baseUrl;
   }
 
-  async getOnvifCameraList(): Promise<{ devices: string[] }> {
+  async getOnvifCameraList(): Promise<{ devices: { ip: string, profiles: string[] }[] }> {
     const response = await fetch(this.baseUrl + '/api/discovery/onvif-devices');
     const data = await response.json();
-      
+
     if (!response.ok) {
-      if (typeof data.error === 'object') {
-        const errorMessages = Object.values(data.error).join(', ');
-        throw new Error(errorMessages || 'Failed to get ONVIF camera list');
-      }
-      throw new Error(data.error || 'Failed to get ONVIF camera list');
+        if (typeof data.error === 'object') {
+            const errorMessages = Object.values(data.error).join(', ');
+            throw new Error(errorMessages || 'Failed to get ONVIF camera list');
+        }
+        throw new Error(data.error || 'Failed to get ONVIF camera list');
     }
 
     // Sort the IP addresses in ascending order
-    data.devices.sort((a: string, b: string) => {
-      const ipA = a.split('.').map(Number);
-      const ipB = b.split('.').map(Number);
+    data.devices.sort((a: { ip: string }, b: { ip: string }) => {
+        const ipA = a.ip.split('.').map(Number);
+        const ipB = b.ip.split('.').map(Number);
 
-      // Compare each octet numerically
-      for (let i = 0; i < 4; i++) {
-        if (ipA[i] < ipB[i]) return -1;
-        if (ipA[i] > ipB[i]) return 1;
-      }
+        // Compare each octet numerically
+        for (let i = 0; i < 4; i++) {
+            if (ipA[i] < ipB[i]) return -1;
+            if (ipA[i] > ipB[i]) return 1;
+        }
 
-      return 0; // If the IPs are the same
+        return 0; // If the IPs are the same
     });
 
     return data;
-  }
+}
 
   async getOnvifCameraData(ip: string, username: string, password: string): Promise<any> {
     try {

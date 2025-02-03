@@ -14,9 +14,12 @@
 
             <!-- Camera Select -->
             <v-col cols="auto">
-              <v-select v-model="selectedOnvifCamera" :items="onvifCameras" item-title="ip" item-value="ip"
-                label="Select a Camera" style="width: 15vw; min-width: 130px;"
-                :rules="[v => !!v || 'Camera is required']"></v-select>
+              <v-select v-model="selectedOnvifCamera" :items="onvifCameras" item-value="ip" label="Select a Camera"
+                style="width: 15vw; min-width: 130px;" :rules="[v => !!v || 'Camera is required']"
+                :item-props="itemProps">
+              </v-select>
+
+
             </v-col>
 
             <!-- Username Input -->
@@ -139,7 +142,7 @@ export default {
 
   setup() {
     const flaskClient = ref<FlaskClient | null>(null);
-    const onvifCameras = ref<Array<{ ip: string; }>>([]);
+    const onvifCameras = ref<Array<{ ip: string; profiles: string[] }>>([]);
     const selectedOnvifCamera = ref<string>('');
     const formValid = ref(false);
     const username = ref<string>('');
@@ -155,12 +158,22 @@ export default {
       try {
         if (flaskClient.value) {
           const response = await flaskClient.value.getOnvifCameraList();
-          onvifCameras.value = response.devices.map((ip: string) => ({ ip }));
+          onvifCameras.value = response.devices.map((device: { ip: string, profiles: string[] }) => ({
+            ip: device.ip,
+            profiles: device.profiles
+          }));
         }
       } catch (error) {
         console.error('Failed to fetch ONVIF cameras:', error);
       }
     };
+
+    const itemProps = (camera: { ip: string; profiles: string[] }) => ({
+      title: camera.ip,
+      subtitle: camera.profiles?.length ? camera.profiles.join(', ') : 'No Profiles'
+    });
+
+
 
 
     const getOnvifCameraData = async () => {
@@ -183,6 +196,7 @@ export default {
           }
         }
       } catch (error: any) {
+        cameraData.value = null;
         errorMessage.value = error;
         // console.error(error);
       }
@@ -245,6 +259,7 @@ export default {
 
     return {
       getOnvifCameraList,
+      itemProps,
       getOnvifCameraData,
       selectProfile,
       formatKey,
