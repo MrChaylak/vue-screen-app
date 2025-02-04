@@ -18,8 +18,6 @@
                 style="width: 15vw; min-width: 130px;" :rules="[v => !!v || 'Camera is required']"
                 :item-props="itemProps">
               </v-select>
-
-
             </v-col>
 
             <!-- Username Input -->
@@ -120,8 +118,7 @@
           <v-col cols="4">
 
             <!-- PTZ Controls -->
-            <PTZControl v-if="cameraData.ptz_available" :selectedProfileToken="selectedProfileToken"
-              :selectedOnvifCamera="selectedOnvifCamera" :username="username" :password="password" />
+            <PTZControl v-if="cameraData.ptz_available" />
 
           </v-col>
         </v-row>
@@ -131,10 +128,12 @@
 </template>
 
 <script lang="ts">
-import { onMounted, ref, onUnmounted } from 'vue';
+import { onMounted, ref, onUnmounted, computed } from 'vue';
 import { FlaskClient } from '@/service/backendService';
 import { nextTick } from 'vue';
 import PTZControl from './PTZControl.vue';
+import { useStore } from 'vuex';
+
 
 export default {
   name: 'OnvifCameraComponent',
@@ -143,16 +142,38 @@ export default {
   setup() {
     const flaskClient = ref<FlaskClient | null>(null);
     const onvifCameras = ref<Array<{ ip: string; profiles: string[] }>>([]);
-    const selectedOnvifCamera = ref<string>('');
-    const formValid = ref(false);
-    const username = ref<string>('');
-    const password = ref<string>('');
     const cameraData = ref<any>(null);
+    const formValid = ref(false);
     const errorMessage = ref<string>('');
-    const selectedProfileToken = ref<string>('');
     let onvifCameraListInterval: number | null = null;
     const streamUri = ref<string>('');
+    const store = useStore();
 
+    // Create computed properties that get and set store state via mutations
+    const selectedOnvifCamera = computed<string>({
+      get: () => store.getters.selectedOnvifCamera,
+      set: (value: string) => store.commit('setSelectedOnvifCamera', value)
+    });
+
+    const username = computed<string>({
+      get: () => store.getters.username,
+      set: (value: string) => store.commit('setUsername', value)
+    });
+
+    const password = computed<string>({
+      get: () => store.getters.password,
+      set: (value: string) => store.commit('setPassword', value)
+    });
+
+    const selectedProfileToken = computed<string>({
+      get: () => store.getters.selectedProfileToken,
+      set: (value: string) => store.commit('setSelectedProfileToken', value)
+    });
+
+    // const cameraData = computed<any>({
+    //   get: () => store.getters.cameraData,
+    //   set: (value: any) => store.commit('setCameraData', value)
+    // });
 
     const getOnvifCameraList = async () => {
       try {
@@ -174,8 +195,6 @@ export default {
     });
 
 
-
-
     const getOnvifCameraData = async () => {
       try {
         if (!formValid.value) {
@@ -189,12 +208,15 @@ export default {
             password.value
           );
           cameraData.value = data;
+          // Update store with fetched data
+          // store.commit('setCameraData', data);
           errorMessage.value = '';
 
           if (data.profiles.length > 0) {
-            selectedProfileToken.value = data.profiles[0].token;
+            store.commit('setSelectedProfileToken', data.profiles[0].token);
           }
         }
+
       } catch (error: any) {
         cameraData.value = null;
         errorMessage.value = error;
