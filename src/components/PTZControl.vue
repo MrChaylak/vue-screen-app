@@ -68,32 +68,14 @@
 </template>
 
 <script lang="ts">
-import { onMounted, ref, onUnmounted } from 'vue';
+import { onMounted, ref, onUnmounted, computed } from 'vue';
 import { FlaskClient } from '@/service/backendService';
+import { useStore } from 'vuex';
 
 export default {
   name: 'PTZControl',
 
-  props: {
-    selectedOnvifCamera: {
-      type: String,
-      required: true
-    },
-    username: {
-      type: String,
-      required: true
-    },
-    password: {
-      type: String,
-      required: true
-    },
-    selectedProfileToken: {
-      type: String,
-      required: true
-    },
-  },
-
-  setup(props) {
+  setup() {
     const flaskClient = ref<FlaskClient | null>(null);
     const ptzSpeed = ref(5); // Default speed is 5
     const ptzButtons: { icon: string; params: [number, number, number] }[] = [
@@ -114,6 +96,12 @@ export default {
       { icon: "mdi-minus", focusDirection: -0.5 }, // Decrease focus
       { icon: "mdi-plus", focusDirection: 0.5 },   // Increase focus
     ];
+    const store = useStore();
+    // Retrieve data from Vuex store
+    const selectedOnvifCamera = computed(() => store.state.selectedOnvifCamera);
+    const username = computed(() => store.state.username);
+    const password = computed(() => store.state.password);
+    const selectedProfileToken = computed(() => store.state.selectedProfileToken);
 
     // Start continuous movement
     const startContinuousMove = async (panSpeed: number, tiltSpeed: number, zoomSpeed: number) => {
@@ -121,12 +109,12 @@ export default {
       const adjustedTiltSpeed = tiltSpeed * (ptzSpeed.value / 8);
       const adjustedZoomSpeed = zoomSpeed;
       try {
-        if (flaskClient.value && props.selectedProfileToken) {
+        if (flaskClient.value && selectedProfileToken.value) {
           const response = await flaskClient.value.ptzMove(
-            props.selectedOnvifCamera,
-            props.username,
-            props.password,
-            props.selectedProfileToken,
+            selectedOnvifCamera.value,
+            username.value,
+            password.value,
+            selectedProfileToken.value,
             adjustedPanSpeed,
             adjustedTiltSpeed,
             adjustedZoomSpeed,
@@ -142,12 +130,12 @@ export default {
     // Stop continuous movement
     const stopContinuousMove = async () => {
         try {
-          if (flaskClient.value && props.selectedProfileToken) {
+          if (flaskClient.value && selectedProfileToken.value) {
             const response = await flaskClient.value.ptzStop(
-              props.selectedOnvifCamera,
-              props.username,
-              props.password,
-              props.selectedProfileToken,
+              selectedOnvifCamera.value,
+              username.value,
+              password.value,
+              selectedProfileToken.value,
             );
             console.log(response.message)
           }
@@ -162,9 +150,9 @@ export default {
       try {
         if (flaskClient.value) {
           const response = await flaskClient.value.moveFocusContinuous(
-            props.selectedOnvifCamera,
-            props.username,
-            props.password,
+            selectedOnvifCamera.value,
+            username.value,
+            password.value,
             focusSpeed
           );
           console.log(response.message)
@@ -180,9 +168,9 @@ export default {
       try {
         if (flaskClient.value) {
           const response = await flaskClient.value.stopFocus(
-            props.selectedOnvifCamera,
-            props.username,
-            props.password,
+            selectedOnvifCamera.value,
+            username.value,
+            password.value,
           );
         console.log(response.message)
         }
@@ -196,6 +184,10 @@ export default {
     });
 
     return {
+      selectedProfileToken,
+      selectedOnvifCamera,
+      username,
+      password,
       ptzSpeed,
       ptzButtons,
       zoomButtons,
