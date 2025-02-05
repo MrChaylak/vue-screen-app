@@ -9,8 +9,7 @@
         <div class="ptz-grid">
           <!-- PTZ Buttons -->
           <template v-for="(button, index) in ptzButtons" :key="`ptz-button-${index}`">
-            <v-btn icon class="ptz-button" @mousedown="startContinuousMove(...button.params)"
-              @mouseup="stopContinuousMove">
+            <v-btn icon class="ptz-button" @mousedown="startContinuousMove(...button.params)">
               <v-icon>{{ button.icon }}</v-icon>
             </v-btn>
           </template>
@@ -36,8 +35,7 @@
         <v-row class="mt-4" align="center" justify="center">
           <template v-for="(button, index) in zoomButtons" :key="`zoom-button-${index}`">
             <v-col cols="auto" :class="{ 'pa-0': button.icon === 'mdi-minus' || button.icon === 'mdi-plus' }">
-              <v-btn icon class="zoom-button" @mousedown="startContinuousMove(0, 0, button.zoomDirection)"
-                @mouseup="stopContinuousMove">
+              <v-btn icon class="zoom-button" @mousedown="startContinuousMove(0, 0, button.zoomDirection)">
                 <v-icon>{{ button.icon }}</v-icon>
               </v-btn>
             </v-col>
@@ -51,8 +49,7 @@
         <v-row class="mt-4" align="center" justify="center">
           <template v-for="(button, index) in focusButtons" :key="`focus-button-${index}`">
             <v-col cols="auto" :class="{ 'pa-0': button.icon === 'mdi-minus' || button.icon === 'mdi-plus' }">
-              <v-btn icon class="focus-button" @mousedown="startFocusContinuous(button.focusDirection)"
-                @mouseup="stopFocus">
+              <v-btn icon class="focus-button" @mousedown="startFocusContinuous(button.focusDirection)">
                 <v-icon>{{ button.icon }}</v-icon>
               </v-btn>
             </v-col>
@@ -108,6 +105,8 @@ export default {
       const adjustedPanSpeed = panSpeed * (ptzSpeed.value / 8);
       const adjustedTiltSpeed = tiltSpeed * (ptzSpeed.value / 8);
       const adjustedZoomSpeed = zoomSpeed;
+      // Add a global mouseup event listener
+      document.addEventListener("mouseup", stopContinuousMove);
       try {
         if (flaskClient.value && selectedProfileToken.value) {
           const response = await flaskClient.value.ptzMove(
@@ -122,6 +121,8 @@ export default {
           console.log(response.message)
         }
       } catch (error: any) {
+        // Remove the global listener after execution
+        document.removeEventListener("mouseup", stopContinuousMove);
         console.error('Failed to perform PTZ movement:', error);
       }
     };
@@ -129,24 +130,28 @@ export default {
 
     // Stop continuous movement
     const stopContinuousMove = async () => {
-        try {
-          if (flaskClient.value && selectedProfileToken.value) {
-            const response = await flaskClient.value.ptzStop(
-              selectedOnvifCamera.value,
-              username.value,
-              password.value,
-              selectedProfileToken.value,
-            );
-            console.log(response.message)
-          }
-        } catch (error: any) {
-          console.error('Failed to stop PTZ movement:', error);
+      // Remove the global listener after execution
+      document.removeEventListener("mouseup", stopContinuousMove);
+      try {
+        if (flaskClient.value && selectedProfileToken.value) {
+          const response = await flaskClient.value.ptzStop(
+            selectedOnvifCamera.value,
+            username.value,
+            password.value,
+            selectedProfileToken.value,
+          );
+          console.log(response.message)
         }
+      } catch (error: any) {
+        console.error('Failed to stop PTZ movement:', error);
+      }
     };
 
 
     // Start continuous focus adjustment
     const startFocusContinuous = async (focusSpeed: number) => {
+      // Add a global mouseup event listener
+      document.addEventListener("mouseup", stopFocus);
       try {
         if (flaskClient.value) {
           const response = await flaskClient.value.moveFocusContinuous(
@@ -158,6 +163,8 @@ export default {
           console.log(response.message)
         }
       } catch (error: any) {
+        // Remove the global listener after execution
+        document.removeEventListener("mouseup", stopFocus);
         console.error('Error starting continuous focus:', error);
       }
     };
@@ -165,6 +172,8 @@ export default {
 
     // Stop focus adjustment
     const stopFocus = async () => {
+      // Remove the global listener after execution
+      document.removeEventListener("mouseup", stopFocus);
       try {
         if (flaskClient.value) {
           const response = await flaskClient.value.stopFocus(
@@ -172,13 +181,13 @@ export default {
             username.value,
             password.value,
           );
-        console.log(response.message)
+          console.log(response.message)
         }
       } catch (error: any) {
         console.error('Error stopping focus:', error);
       }
     };
-    
+
     onMounted(() => {
       flaskClient.value = new FlaskClient('http://127.0.0.1:5000');
     });
