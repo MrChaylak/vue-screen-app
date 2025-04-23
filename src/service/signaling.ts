@@ -115,7 +115,7 @@ export class WebRTCClient {
                     this.peerConnection.removeTrack(sender);
                 }
             });
-            // this.dataChannel.close();
+            this.dataChannel.close();
             this.peerConnection.close();
             this.createPeerConnection(); // Recreate the peer connection
 
@@ -138,7 +138,7 @@ export class WebRTCClient {
                     this.peerConnection.removeTrack(sender);
                 }
             });
-            // this.dataChannel.close();
+            this.dataChannel.close();
             this.peerConnection.close();
             this.createPeerConnection(); // Recreate the peer connection
         }

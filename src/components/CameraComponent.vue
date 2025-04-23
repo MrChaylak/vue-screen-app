@@ -113,7 +113,14 @@
         };
   
         // Start fetching the camera list every 5 seconds
-        cameraListInterval = setInterval(getCameraList, 5000);
+        // cameraListInterval = setInterval(getCameraList, 5000);
+        // Wait for WebSocket to connect before starting camera list updates
+        webrtcClient.value.signalingServer.onopen = () => {
+          // Get camera list immediately when connection is ready
+          getCameraList();
+          // Then start getting updates every 5 seconds
+          cameraListInterval = setInterval(getCameraList, 10000);
+        };
       });
   
       // Clear the interval when the component is unmounted
