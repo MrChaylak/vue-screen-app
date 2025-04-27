@@ -54,7 +54,7 @@ export class WebRTCClient {
             this.remoteStream.addTrack(event.track);
         };
 
-        this.peerConnection.oniceconnectionstatechange = () => {
+        this.peerConnection.onconnectionstatechange = () => {
             console.log(`Peer connection state changed for ${this.id}:`, this.peerConnection.connectionState);
             if (this.peerConnection.connectionState === 'disconnected') {
                 console.log(`Peer connection disconnected for ${this.id}`);
