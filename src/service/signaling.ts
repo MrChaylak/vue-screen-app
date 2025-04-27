@@ -37,6 +37,7 @@ export class WebRTCClient {
 
         this.peerConnection.onicecandidate = (event) => {
             if (event.candidate) {
+                console.log(`ICE candidate generated for ${this.id}:`, event.candidate);
                 this.signalingServer.send(JSON.stringify({ type: 'ice-candidate', id: this.id, candidate: event.candidate }));
             }
         };
@@ -51,6 +52,14 @@ export class WebRTCClient {
                 }
             }
             this.remoteStream.addTrack(event.track);
+        };
+
+        this.peerConnection.oniceconnectionstatechange = () => {
+            console.log(`Peer connection state changed for ${this.id}:`, this.peerConnection.connectionState);
+            if (this.peerConnection.connectionState === 'disconnected') {
+                console.log(`Peer connection disconnected for ${this.id}`);
+                this.cleanup();
+            }
         };
     }
 

@@ -119,7 +119,7 @@
           // Get camera list immediately when connection is ready
           getCameraList();
           // Then start getting updates every 5 seconds
-          cameraListInterval = setInterval(getCameraList, 10000);
+          cameraListInterval = setInterval(getCameraList, 5000);
         };
       });
   

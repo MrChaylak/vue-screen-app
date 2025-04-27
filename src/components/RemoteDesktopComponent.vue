@@ -182,7 +182,7 @@
           // Get screen list immediately when connection is ready
           getScreenList();
           // Then start getting updates every 5 seconds
-          screenListInterval = setInterval(getScreenList, 10000);
+          screenListInterval = setInterval(getScreenList, 5000);
         };
       });
   
